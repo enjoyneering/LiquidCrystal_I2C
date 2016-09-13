@@ -201,14 +201,14 @@ bool LiquidCrystal_I2C::begin(uint8_t lcd_colums, uint8_t lcd_rows, lcd_font_siz
   send(LCD_INSTRUCTION_WRITE, LCD_4BIT_MODE | _displayFunction, 8);
 	
   /* initializes lcd controls: turn display off, set cursor off and blinking off (by default) */
-  _displayControl = LCD_CURSOR_OFF | LCD_BLINK_OFF;
+  _displayControl = LCD_UNDERLINE_CURSOR_OFF | LCD_BLINK_CURSOR_OFF;
   noDisplay();
 
   /* clear display */
   clear();
 
   /* initializes lcd basics: sets text direction "left to right" & cursor movement to the right (by default) */
-  _displayMode = LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_DECREMENT;
+  _displayMode = LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_OFF;
   send(LCD_INSTRUCTION_WRITE, LCD_ENTRY_MODE_SET | _displayMode, 8);
 
   /* !!! END OF 4-BIT INITIALIZATIONS PROCEDURE !!! */
@@ -313,7 +313,7 @@ void LiquidCrystal_I2C::display(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::noCursor(void)
 {
-  _displayControl &= LCD_CURSOR_OFF;
+  _displayControl &= LCD_UNDERLINE_CURSOR_OFF;
   send(LCD_INSTRUCTION_WRITE, LCD_DISPLAY_CONTROL | _displayControl, 8);
 }
 
@@ -326,7 +326,7 @@ void LiquidCrystal_I2C::noCursor(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::cursor(void)
 {
-  _displayControl |= LCD_CURSOR_ON;
+  _displayControl |= LCD_UNDERLINE_CURSOR_ON;
   send(LCD_INSTRUCTION_WRITE, LCD_DISPLAY_CONTROL | _displayControl, 8);
 }
 
@@ -339,7 +339,7 @@ void LiquidCrystal_I2C::cursor(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::noBlink(void)
 {
-  _displayControl &= LCD_BLINK_OFF;
+  _displayControl &= LCD_BLINK_CURSOR_OFF;
   send(LCD_INSTRUCTION_WRITE, LCD_DISPLAY_CONTROL | _displayControl, 8);
 }
 
@@ -352,7 +352,7 @@ void LiquidCrystal_I2C::noBlink(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::blink(void)
 {
-  _displayControl |= LCD_BLINK_ON;
+  _displayControl |= LCD_BLINK_CURSOR_ON;
   send(LCD_INSTRUCTION_WRITE, LCD_DISPLAY_CONTROL | _displayControl, 8);
 }
 
@@ -360,7 +360,7 @@ void LiquidCrystal_I2C::blink(void)
 /*
     LCD - scrollDisplayLeft()
 
-    Scrolls the text on the display to the left, without changing the RAM
+    Scrolls the current row with text on the display to the left.
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::scrollDisplayLeft(void)
@@ -372,7 +372,7 @@ void LiquidCrystal_I2C::scrollDisplayLeft(void)
 /*
     LCD - scrollDisplayRight()
 
-    Scrolls the text on the display to the right, without changing the RAM
+    Scrolls the current row with text on the display to the right.
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::scrollDisplayRight(void)
@@ -410,12 +410,13 @@ void LiquidCrystal_I2C::rightToLeft(void)
 /*
     LCD - autoscroll()
 
-    Autoscrolls the text on the display
+    Autoscrolls the text on the display (whole text on the display shift when
+    the byte written, cursot stays)
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::autoscroll(void) 
 {
-  _displayMode |= LCD_ENTRY_SHIFT_INCREMENT;
+  _displayMode |= LCD_ENTRY_SHIFT_ON;
   send(LCD_INSTRUCTION_WRITE, LCD_ENTRY_MODE_SET | _displayMode, 8);
 }
 
@@ -423,12 +424,13 @@ void LiquidCrystal_I2C::autoscroll(void)
 /*
     LCD - noAutoscroll()
 
-    Stops text autoscrolling on the display
+    Stops text autoscrolling on the display (whole text on the display stays,
+    cursor shifts when the byte written)
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::noAutoscroll(void)
 {
-  _displayMode |= LCD_ENTRY_SHIFT_DECREMENT;
+  _displayMode |= LCD_ENTRY_SHIFT_OFF;
   send(LCD_INSTRUCTION_WRITE | LCD_ENTRY_MODE_SET, _displayMode, 8);
 }
 
@@ -527,7 +529,7 @@ void LiquidCrystal_I2C::backlight(void)
     Arduino Class <Print> calls this to send characters to the LCD
 */
 /**************************************************************************/
-inline size_t LiquidCrystal_I2C::write(uint8_t value)
+size_t LiquidCrystal_I2C::write(uint8_t value)
 {
   send(LCD_DATA_WRITE, value, 8);
   return 1;
@@ -541,11 +543,11 @@ inline size_t LiquidCrystal_I2C::write(uint8_t value)
     The most anvanced & fastes way to write COMMAND or DATA/TEXT to LCD
     
     NOTE: all inputs formated as follow 
-          mode  - RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
+          mode  - RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
           value - DB7,DB6,DB5,DB4,DB3,DB2,DB1,DB0
 */
 /**************************************************************************/
-inline void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
+void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
 {
   uint8_t data;
   uint8_t msb;
@@ -554,36 +556,33 @@ inline void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
   switch(length)
   {
     case 4:
-      lsb = value >> 4;                      //isolate 4 LBS bits (leftmost bits)
-      lsb = lsb << 1;                        //shift 1 bit left for future backlight value
-      data = portMapping(mode | lsb);        //mask register command & value
-      writePCF8574(data);                    //send the command with En pulse HIGH
-      delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse must be > 450ns
-      bitClear(data, (_LCD_TO_PCF8574[2]));  //set En pin to LOW to execute the command
-      writePCF8574(data);                    //execute the command
-      delayMicroseconds(LCD_COMMAND_DELAY);  //LCD needs > ~37 .. 43us to finish the command
+      lsb  = value >> 3;                     //0,0,0,DB7,DB6,DB5,DB4,DB3
+      lsb  = lsb & 0x1E;                     //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0 
+      data = portMapping(mode | lsb);        //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+      writePCF8574(data);                    //send command
+      delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
+      bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
+      writePCF8574(data);                    //execute command
+      delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
       break;
     case 8:
-      lsb = value >> 4;                      //see p.42 & p.17 of HD44780 datasheet 
-      lsb = lsb << 1;
+      lsb  = value >> 3;                     //see p.42 & p.17 of HD44780 datasheet
+      lsb  = lsb & 0x1E;
       data = portMapping(mode | lsb);
       writePCF8574(data);
       delayMicroseconds(LCD_EN_PULSE_DELAY);
       bitClear(data, (_LCD_TO_PCF8574[2]));
       writePCF8574(data);
       delayMicroseconds(LCD_COMMAND_DELAY);
-      
-      msb = value << 4;
-      msb = msb >> 3;
-      data = portMapping(mode | msb);
-      writePCF8574(data);
-      delayMicroseconds(LCD_EN_PULSE_DELAY);
-      bitClear(data, (_LCD_TO_PCF8574[2]));
-      writePCF8574(data);
-      delayMicroseconds(LCD_COMMAND_DELAY);
-      break;
-    default:
-      writePCF8574(PCF8574_ALL_LOW);
+
+      msb = value << 1;                      //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
+      msb = msb & 0x1E;                      //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0 
+      data = portMapping(mode | msb);        //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
+      writePCF8574(data);                    //send command
+      delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
+      bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
+      writePCF8574(data);                    //execute command
+      delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
       break;
   }
 }
@@ -671,7 +670,7 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
 
 /**************************************************************************/
 /*
-    LCD - busyFlagCheck()
+    LCD - readBusyFlag()
 
     Checks the LCD's Busy Flag (BF). Retuns: 1 - busy, 0 - ready.   
     Contents of address counter (cursor position) also can be read. 
@@ -683,30 +682,51 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
           address counter - DB6, DB5, DB4, DB3, DB2, DB1, DB0
 */
 /**************************************************************************/
-bool LiquidCrystal_I2C::busyFlagCheck()
+bool LiquidCrystal_I2C::readBusyFlag()
 {
   send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, 4);
 
   return bitRead(readPCF8574(), _LCD_TO_PCF8574[3]);
 }
 
-
-/* !!! Arduino Unsupported API functions !!! */
-
 /**************************************************************************/
 /*
-    LCD - status()
-    
-    return DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0 values from LCD
+    LCD - readAddressCounter()
+
+    Returns the contents of address counter (cursor position)
+
+    NOTE: To retrive address counter, set RS = 0 & RW = 1
+
+          DB7 pin = 1     - Internaly operated (busy)
+          DB7 pin = 0     - Next instruction accepted (ready)
+          address counter - DB6, DB5, DB4, DB3, DB2, DB1, DB0
 */
 /**************************************************************************/
-uint8_t LiquidCrystal_I2C::status()
+uint8_t LiquidCrystal_I2C::readAddressCounter()
 {
-  send(LCD_DATA_READ, PCF8574_DATA_HIGH, 4);
+  uint8_t data;
+  uint8_t value;
 
-  return readPCF8574(); 
+  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, 4);
+  data = readPCF8574();
+
+  for (uint8_t i = 4; i < 7; i++)  //D6, D5, D4
+  {
+    bitWrite(value, 10 - i, bitRead(data, _LCD_TO_PCF8574[i]));
+  }
+
+  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, 4);
+  data = readPCF8574();
+
+  for (uint8_t i = 3; i < 7; i++) //D3, D2, D1, D0
+  {
+    bitWrite(value, 6 - i, bitRead(data, _LCD_TO_PCF8574[i]));
+  }
+
+  return value;
 }
 
+/* !!! Arduino Unsupported API functions !!! */
 
 /**************************************************************************/
 /*
