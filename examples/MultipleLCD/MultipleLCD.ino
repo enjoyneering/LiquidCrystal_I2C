@@ -23,7 +23,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  if (lcd_01.begin(20, 4) != 1)
+  if (lcd_01.begin(20, 4) != 1) //colums - 20, rows - 4
   {
     Serial.println("PCF8574_01 is not connected or lcd pins declaration is wrong. Only pins numbers 4,5,6,16,11,12,13,14 are legal.");
   }
@@ -32,7 +32,7 @@ void setup()
     lcd_01.print("PCF8574_01 is OK...");
   }
 
-  if (lcd_02.begin(16, 2) != 1)
+  if (lcd_02.begin(16, 2) != 1) //colums - 16, rows - 2
   {
     Serial.println("PCF8574_02 is not connected or lcd pins declaration is wrong. Only pins numbers 4,5,6,16,11,12,13,14 are legal.");
   }
