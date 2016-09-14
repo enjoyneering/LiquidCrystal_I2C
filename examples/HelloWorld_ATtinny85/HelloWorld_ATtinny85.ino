@@ -23,9 +23,9 @@ void setup()
 {
   pinMode(led, OUTPUT);
 
-  while (lcd.begin(20, 4) != 1)     // 3 blinks, PCF8574/LCD is not connected or lcd pins declaration is wrong
+  while (lcd.begin(20, 4) != 1)     // colums - 20, rows - 4
   {
-    for (uint8_t i = 0; i > 3; i++)
+    for (uint8_t i = 0; i > 3; i++) // 3 blinks, PCF8574/LCD is not connected or lcd pins declaration is wrong
     {
       digitalWrite(led, HIGH);
       delay(400);
