@@ -278,7 +278,7 @@ void LiquidCrystal_I2C::setCursor(uint8_t colum, uint8_t row)
 /*
     LCD - noDisplay()
 
-    Turns the display OFF & clears text from the screen
+    Clears text from the screen
 
     NOTE: text & data remains in DDRAM !!!
 */
@@ -293,7 +293,7 @@ void LiquidCrystal_I2C::noDisplay(void)
 /*
     LCD - display()
 
-    Turns the display ON & retrives text from DDRAM
+    Retrives text from DDRAM
 
     NOTE: text & data remains in DDRAM !!!
 */
@@ -493,7 +493,7 @@ void LiquidCrystal_I2C::noBacklight(void)
   }
   _backlightValue = _backlightValue << (_LCD_TO_PCF8574[7]);
 
-  writePCF8574(PCF8574_ALL_LOW | _backlightValue);
+  writePCF8574(PCF8574_ALL_LOW);
 }
 
 /**************************************************************************/
@@ -518,7 +518,7 @@ void LiquidCrystal_I2C::backlight(void)
   }
   _backlightValue = _backlightValue << (_LCD_TO_PCF8574[7]);
 
-  writePCF8574(PCF8574_ALL_LOW | _backlightValue);
+  writePCF8574(PCF8574_ALL_LOW);
 }
 
 
@@ -553,37 +553,25 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
   uint8_t msb;
   uint8_t lsb;
 
-  switch(length)
-  {
-    case 4:
-      lsb  = value >> 3;                     //0,0,0,DB7,DB6,DB5,DB4,DB3
-      lsb  = lsb & 0x1E;                     //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0 
-      data = portMapping(mode | lsb);        //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
-      writePCF8574(data);                    //send command
-      delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
-      bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
-      writePCF8574(data);                    //execute command
-      delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
-      break;
-    case 8:
-      lsb  = value >> 3;                     //see p.42 & p.17 of HD44780 datasheet
-      lsb  = lsb & 0x1E;
-      data = portMapping(mode | lsb);
-      writePCF8574(data);
-      delayMicroseconds(LCD_EN_PULSE_DELAY);
-      bitClear(data, (_LCD_TO_PCF8574[2]));
-      writePCF8574(data);
-      delayMicroseconds(LCD_COMMAND_DELAY);
+  lsb  = value >> 3;                     //0,0,0,DB7,DB6,DB5,DB4,DB3
+  lsb  = lsb & 0x1E;                     //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0 
+  data = portMapping(mode | lsb);        //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+  writePCF8574(data);                    //send command
+  delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
+  bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
+  writePCF8574(data);                    //execute command
+  delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
 
-      msb = value << 1;                      //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
-      msb = msb & 0x1E;                      //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0 
-      data = portMapping(mode | msb);        //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
-      writePCF8574(data);                    //send command
-      delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
-      bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
-      writePCF8574(data);                    //execute command
-      delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
-      break;
+  if (length == 8)
+  {
+    msb = value << 1;                      //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
+    msb = msb & 0x1E;                      //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0 
+    data = portMapping(mode | msb);        //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
+    writePCF8574(data);                    //send command
+    delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
+    bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
+    writePCF8574(data);                    //execute command
+    delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
   }
 }
 
@@ -616,19 +604,20 @@ uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
 /*
     LCD - writePCF8574()
 
-    Adds Backlight value to the data & writes a byte to PCF8574 over I2C
+    Masks backlight with data & writes it to PCF8574 over I2C
 */
 /**************************************************************************/
-void LiquidCrystal_I2C::writePCF8574(uint8_t _data)
+void LiquidCrystal_I2C::writePCF8574(uint8_t value)
 {
   Wire.beginTransmission(_PCF8574_address);
  #if ARDUINO >= 100
-  Wire.write(_data | _backlightValue);
+  Wire.write(value | _backlightValue);
  #else
-  Wire.send(_data | _backlightValue);
+  Wire.send(value | _backlightValue);
  #endif
   Wire.endTransmission();
 }
+
 
 /**************************************************************************/
 /*
@@ -668,6 +657,7 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
  #endif
 }
 
+
 /**************************************************************************/
 /*
     LCD - readBusyFlag()
@@ -688,6 +678,7 @@ bool LiquidCrystal_I2C::readBusyFlag()
 
   return bitRead(readPCF8574(), _LCD_TO_PCF8574[3]);
 }
+
 
 /**************************************************************************/
 /*
