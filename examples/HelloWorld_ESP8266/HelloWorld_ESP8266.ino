@@ -22,7 +22,7 @@ void setup()
   Serial.begin(115200);
   Serial.flush();
 
-  while (lcd.begin(20, 4, LCD_5x8DOTS, D1, D2) != 1)
+  while (lcd.begin(20, 4, LCD_5x8DOTS, D1, D2) != 1)  //colums - 20, rows - 4, pixels - LCD_5x8DOTS, SDA - D1, SCL - D2
   {
     Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
     delay(5000);
