@@ -10,6 +10,14 @@
   ATtiny85:                  0(5)    2/A1(7) (TinyWireM   - https://github.com/SpenceKonde/TinyWireM & ATTinyCore - https://github.com/SpenceKonde/ATTinyCore)
   ESP8266 ESP-xx:            ANY     ANY     (ESP8266Core - https://github.com/esp8266/Arduino)
   NodeMCU 1.0:               ANY     ANY     (D1 & D2 by default)
+  
+  NOTE:
+  - ESP8266 ESP-xx needs at least 500mA - 800mA.
+  - ESP8266 ESP-xx connect a large capacitor ~ 470 uF across
+    the Vcc & Gnd rails. It will minimize reset inducing voltage fluctuations.
+  - ESP8266 ESP-xx connect a small 0.1 uF decoupling capacitor across
+    the Vcc & Gnd inputs very close to the pins (within 1/2 inch).
+    DO NOT SKIP THIS COMPONENT! Then missing, is the root cause of ESP8266 resets.
 */
 /******************************************************************************/
 #include <Wire.h> 
