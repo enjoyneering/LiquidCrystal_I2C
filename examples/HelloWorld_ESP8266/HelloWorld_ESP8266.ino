@@ -20,7 +20,6 @@ LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POS
 void setup()
 {
   Serial.begin(115200);
-  Serial.flush();
 
   while (lcd.begin(20, 4, LCD_5x8DOTS, D1, D2) != 1)  //colums - 20, rows - 4, pixels - LCD_5x8DOTS, SDA - D1, SCL - D2
   {
