@@ -1,14 +1,13 @@
 /******************************************************************************/
 /*
   This is an Arduino library for HD44780, S6A0069, KS0066U, NT3881D, LC7985, 
-  ST7066, SPLC780, WH160xB, AIP31066, GDM200xD LCD displays, operated in 4 bit
+  ST7066, SPLC780, WH160xB, AIP31066, GDM200xD, ADM0802A LCD displays, operated in 4 bit
   mode over I2C bus with 8-bit I/O expander PCF8574. Typical displays resolutions
-  are: 16x1, 16x2, 16x4, 20x2, 20x4 and etc.
+  are: 8x2, 16x1, 16x2, 16x4, 20x2, 20x4 and etc.
 
   written by enjoyneering79
 
-  These IC uses I2C bus to communicate, 2 pins are required to  
-  interface
+  These IC uses I2C bus to communicate, 2 pins are required to interface
 
   Connect PCF8574 to pins :  SDA     SCL
   Uno, Mini, Pro:            A4      A5
@@ -16,7 +15,7 @@
   Leonardo:                  2       3
   ATtiny85:                  0(5)    2/A1(7) (TinyWireM   - https://github.com/SpenceKonde/TinyWireM)
   ESP8266 ESP-xx:            ANY     ANY     (ESP8266Core - https://github.com/esp8266/Arduino)
-  NodeMCU 1.0:               ANY     ANY     (D1 & D2 by default)
+  NodeMCU 1.0:               ANY     ANY     (D2 & D1 by default)
 
   BSD license, all text above must be included in any redistribution
 */
@@ -49,58 +48,60 @@
 
 /* !!! NOTE: all commands formated as: RS, RW, E=1, DB7=0, DB6=0, DB5=0, DB4=0, BCK_LED=0 */
 /* lcd main register commands */
-#define LCD_INSTRUCTION_WRITE    0x20 /* Writes command to Instruction Register (IR). Such as: data length (DL), number of lines (N), font size (F). */
-#define LCD_DATA_WRITE           0xA0 /* Writes data/text to Data Register (DR) */
-#define LCD_DATA_READ            0xE0 /* Reads data(text) from Data Register (DR) - values from pins DB7..DB0 */
-#define LCD_BUSY_FLAG_READ       0x60 /* Reads Busy Flag (BF) - indicating internal operation is being performed and reads address counter(row, column) content. */
+#define LCD_INSTRUCTION_WRITE    0x20 //Writes command to Instruction Register (IR). Such as: data length (DL), number of lines (N), font size (F).
+#define LCD_DATA_WRITE           0xA0 //Writes data/text to Data Register (DR)
+#define LCD_DATA_READ            0xE0 //Reads data(text) from Data Register (DR) - values from pins DB7..DB0
+#define LCD_BUSY_FLAG_READ       0x60 //Reads Busy Flag (BF) - indicating internal operation is being performed and reads address counter(row, column) content.
 
 /* !!! NOTE: all controls formated as: DB7, DB6, DB5, DB4, DB3, DB2, DB1, DB0 */
 /* lcd main register commands controls */
-#define LCD_CLEAR_DISPLAY        0x01 /* Clears entire display (fill with spacers) and sets DDRAM address (cursor position) to 0 in the address counter. */
-#define LCD_RETURN_HOME          0x02 /* Sets DDRAM address 0 in address counter. Returns display to original position. DDRAM contents remain unchanged. */
-#define LCD_ENTRY_MODE_SET       0x04 /* Sets cursor type, moving and display shift direction. These operations are performed during data write and read. */
-#define LCD_DISPLAY_CONTROL      0x08 /* Sets display on/off (D), cursor on/off (C), cursor blinking on/off (B). */
-#define LCD_CURSOR_SHIFT         0x10 /* Moves cursor and shifts display without changing DDRAM contents. */
-#define LCD_SET_CGRAM_ADDR       0x40 /* Sets CGRAM address. CGRAM data is sent and received after this setting. */
-#define LCD_SET_DDRAM_ADDR       0x80 /* Sets DDRAM address (cursor position). DDRAM data is sent and received after this setting. */
+#define LCD_CLEAR_DISPLAY        0x01 //Clears entire display (fill with spacers) and sets DDRAM address (cursor position) to 0 in the address counter.
+#define LCD_RETURN_HOME          0x02 //Sets DDRAM address 0 in address counter. Returns display to original position. DDRAM contents remain unchanged.
+#define LCD_ENTRY_MODE_SET       0x04 //Sets cursor type, moving and display shift direction. These operations are performed during data write and read.
+#define LCD_DISPLAY_CONTROL      0x08 //Sets display on/off (D), cursor on/off (C), cursor blinking on/off (B).
+#define LCD_CURSOR_SHIFT         0x10 //Moves cursor and shifts display without changing DDRAM contents.
+#define LCD_SET_CGRAM_ADDR       0x40 //Sets CGRAM address. CGRAM data is sent and received after this setting.
+#define LCD_SET_DDRAM_ADDR       0x80 //Sets DDRAM address (cursor position). DDRAM data is sent and received after this setting.
 
 /* LCD_ENTRY_MODE_SET controls */
-#define LCD_ENTRY_RIGHT          0x00 /* Sets entry/text direction decrement/"right to left" (I/D). */
-#define LCD_ENTRY_LEFT           0x02 /* Sets entry/text direction increment/"left to right" (I/D). */
-#define LCD_ENTRY_SHIFT_ON       0x01 /* Entry/text shifts when the byte written, cursot stays (S). */
-#define LCD_ENTRY_SHIFT_OFF      0x00 /* Entry/text stays, cursor moves when the byte written  (S). */
+#define LCD_ENTRY_RIGHT          0x00 //Sets entry/text direction decrement/"right to left" (I/D).
+#define LCD_ENTRY_LEFT           0x02 //Sets entry/text direction increment/"left to right" (I/D).
+#define LCD_ENTRY_SHIFT_ON       0x01 //Entry/text shifts when the byte written, cursot stays (S).
+#define LCD_ENTRY_SHIFT_OFF      0x00 //Entry/text stays, cursor moves when the byte written  (S).
 
 /* LCD_DISPLAY_CONTROL controls */
-#define LCD_DISPLAY_ON           0x04 /* Turns display ON  & retrive text from the DDRAM (D). */
-#define LCD_DISPLAY_OFF          0x00 /* Turns display OFF & clears text from the screen & remains it in DDRAM (D). */
-#define LCD_UNDERLINE_CURSOR_ON  0x02 /* Turns ON  the underline cursor (C). */
-#define LCD_UNDERLINE_CURSOR_OFF 0x00 /* Turns OFF the underline cursor (C). */
-#define LCD_BLINK_CURSOR_ON      0x01 /* Turns ON  the blinking  cursor (B). */
-#define LCD_BLINK_CURSOR_OFF     0x00 /* Turns OFF the blinking  cursor (B). */
+#define LCD_DISPLAY_ON           0x04 //Turns display ON  & retrive text from the DDRAM (D).
+#define LCD_DISPLAY_OFF          0x00 //Turns display OFF & clears text from the screen & remains it in DDRAM (D).
+#define LCD_UNDERLINE_CURSOR_ON  0x02 //Turns ON  the underline cursor (C).
+#define LCD_UNDERLINE_CURSOR_OFF 0x00 //Turns OFF the underline cursor (C).
+#define LCD_BLINK_CURSOR_ON      0x01 //Turns ON  the blinking  cursor (B).
+#define LCD_BLINK_CURSOR_OFF     0x00 //Turns OFF the blinking  cursor (B).
 
 /* LCD_CURSOR_SHIFT controls */
-#define LCD_DISPLAY_MOVE         0x08 /* Display/text shifts after char print (SC). */
-#define LCD_CURSOR_MOVE          0x00 /* Cursor shifts after char print       (SC). */
-#define LCD_MOVE_RIGHT           0x04 /* Cursor or Display shifts to right    (RL). */
-#define LCD_MOVE_LEFT            0x00 /* Cursor or Display shifts to left     (RL). */
+#define LCD_DISPLAY_MOVE         0x08 //Display/text shifts after char print (SC).
+#define LCD_CURSOR_MOVE          0x00 //Cursor shifts after char print       (SC).
+#define LCD_MOVE_RIGHT           0x04 //Cursor or Display shifts to right    (RL).
+#define LCD_MOVE_LEFT            0x00 //Cursor or Display shifts to left     (RL).
 
 /* LCD_INSTRUCTION_WRITE controls */
-#define LCD_8BIT_MODE            0x30 /* Select 8 bit interface            (DL) */
-#define LCD_4BIT_MODE            0x20 /* Select 4 bit interface            (DL) */
-#define LCD_1_LINE               0x00 /* Selects one line display          (N)  */
-#define LCD_2_LINE               0x08 /* Selects two or more lines display (N)  */
+#define LCD_8BIT_MODE            0x30 //Select 8 bit interface            (DL).
+#define LCD_4BIT_MODE            0x20 //Select 4 bit interface            (DL).
+#define LCD_1_LINE               0x00 //Selects one line display          (N).
+#define LCD_2_LINE               0x08 //Selects two or more lines display (N).
 
 /* lcd misc. */
-#define LCD_HOME_CLEAR_DELAY     2000 /* Duration of the home & clear commands, in microseconds. Must be > 1.53 .. 1.64ms */
-#define LCD_COMMAND_DELAY        50   /* Duration of command, in microseconds. Must be > 37 .. 43us */
-#define LCD_EN_PULSE_DELAY       1    /* Duration of the En pulse, in microseconds. Must be > 450ns */
+#define LCD_HOME_CLEAR_DELAY     2000 //Duration of the home & clear commands, in microseconds. Must be > 1.53 .. 1.64ms
+#define LCD_COMMAND_DELAY        50   //Duration of command, in microseconds. Must be > 37 .. 43us
+#define LCD_EN_PULSE_DELAY       1    //Duration of the En pulse, in microseconds. Must be > 450ns
+#define LCD_CMD_LENGTH_8BIT      8    //8bit command length
+#define LCD_CMD_LENGTH_4BIT      4    //4bit command length
 
 
 /* LCD_INSTRUCTION_WRITE controls */
 typedef enum
 {
-  LCD_5x10DOTS = 0x04, /* 5x9 dots for charecter, plus 5x1 dots for cursor. 5x10 total. */
-  LCD_5x8DOTS  = 0x00  /* 5x7 dots for charecter, plus 5x1 dots for cursor. 5x8  total. */
+  LCD_5x10DOTS = 0x04,                //5x9 dots for charecter, plus 5x1 dots for cursor. 5x10 total.
+  LCD_5x8DOTS  = 0x00                 //5x7 dots for charecter, plus 5x1 dots for cursor. 5x8  total.
 }
 lcd_font_size;
 
@@ -108,26 +109,26 @@ lcd_font_size;
 /* PCF8574 controls */
 #define LCD_BACKLIGHT_ON   0x01
 #define LCD_BACKLIGHT_OFF  0x00
-#define PCF8574_ALL_LOW    0x00 /* Sets all PCF8574 pins to LOW */
-#define PCF8574_DATA_HIGH  0x3E /* Sets lcd pins E, DB7, DB6, DB5, DB4 to HIGH */
+#define PCF8574_ALL_LOW    0x00       //Sets all PCF8574 pins to LOW
+#define PCF8574_DATA_HIGH  0x3E       //Sets lcd pins E, DB7, DB6, DB5, DB4 to HIGH
 
 
 /* PCF8574 addresses */
 typedef enum
 {
-  PCF8574_ADDR_A21_A11_A01 = 0x27, /* I2C address. A2 = 1, A1 = 1, A0 = 1 (by default) */
-  PCF8574_ADDR_A21_A11_A00 = 0x26, /* I2C address. A2 = 1, A1 = 1, A0 = 0 */
-  PCF8574_ADDR_A21_A10_A01 = 0x25, /* I2C address. A2 = 1, A1 = 0, A0 = 1 */
-  PCF8574_ADDR_A21_A10_A00 = 0x24, /* I2C address. A2 = 1, A1 = 0, A0 = 0 */
-  PCF8574_ADDR_A20_A11_A01 = 0x23, /* I2C address. A2 = 0, A1 = 1, A0 = 1 */
-  PCF8574_ADDR_A20_A11_A00 = 0x22, /* I2C address. A2 = 0, A1 = 1, A0 = 0 */
-  PCF8574_ADDR_A20_A10_A01 = 0x21, /* I2C address. A2 = 0, A1 = 0, A0 = 1 */
-  PCF8574_ADDR_A20_A10_A00 = 0x20  /* I2C address. A2 = 0, A1 = 0, A0 = 0 */
+  PCF8574_ADDR_A21_A11_A01 = 0x27,    //I2C address. A2 = 1, A1 = 1, A0 = 1 (by default)
+  PCF8574_ADDR_A21_A11_A00 = 0x26,    //I2C address. A2 = 1, A1 = 1, A0 = 0
+  PCF8574_ADDR_A21_A10_A01 = 0x25,    //I2C address. A2 = 1, A1 = 0, A0 = 1
+  PCF8574_ADDR_A21_A10_A00 = 0x24,    //I2C address. A2 = 1, A1 = 0, A0 = 0
+  PCF8574_ADDR_A20_A11_A01 = 0x23,    //I2C address. A2 = 0, A1 = 1, A0 = 1
+  PCF8574_ADDR_A20_A11_A00 = 0x22,    //I2C address. A2 = 0, A1 = 1, A0 = 0
+  PCF8574_ADDR_A20_A10_A01 = 0x21,    //I2C address. A2 = 0, A1 = 0, A0 = 1
+  PCF8574_ADDR_A20_A10_A00 = 0x20     //I2C address. A2 = 0, A1 = 0, A0 = 0
 }
 PCF8574_address;
 
 
-/* PCF8574 backlight controls. transistor switching polarity */
+/* PCF8574 backlight controls - transistor switching polarity */
 typedef enum
 {
   POSITIVE = 0x01,
@@ -141,11 +142,11 @@ class LiquidCrystal_I2C : public Print
   public:
    LiquidCrystal_I2C(PCF8574_address = PCF8574_ADDR_A21_A11_A01, uint8_t P0 = 4, uint8_t P1 = 5, uint8_t P2 = 6, uint8_t P3 = 16, uint8_t P4 = 11, uint8_t P5 = 12, uint8_t P6 = 13, uint8_t P7 = 14, switchPolarity = POSITIVE);
  
-  #if defined(ESP8266)
+    #if defined(ESP8266)
    bool begin(uint8_t lcd_colums = 16, uint8_t lcd_rows = 2, lcd_font_size = LCD_5x8DOTS, uint8_t sda = SDA, uint8_t scl = SCL);
-  #else
+    #else
    bool begin(uint8_t lcd_colums = 16, uint8_t lcd_rows = 2, lcd_font_size = LCD_5x8DOTS);
-  #endif
+    #endif
    void clear(void);
    void home(void);
    void noDisplay(void);
@@ -171,7 +172,9 @@ class LiquidCrystal_I2C : public Print
 
    /* Arduino class "Print" calls func. <write()> to send characters to the LCD */
    size_t write(uint8_t);
+   size_t print(uint8_t);
    using  Print::write;
+   using  Print::print;
 
    /* Arduino Unsupported API functions */
    void    setBrightness(uint8_t pin, uint8_t value, switchPolarity);
