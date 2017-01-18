@@ -123,7 +123,7 @@ bool LiquidCrystal_I2C::begin(uint8_t lcd_colums, uint8_t lcd_rows, lcd_font_siz
   }
  #if defined(ESP8266)
   Wire.begin(sda, scl);
-  Wire.setClockStretchLimit(0);              //experimental! if 0 doesn't work set to 1600
+  //Wire.setClockStretchLimit(0);            //experimental! if 0 doesn't work set to 1600
  #else
   Wire.begin();
  #endif
