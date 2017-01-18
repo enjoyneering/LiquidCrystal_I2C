@@ -168,7 +168,6 @@ bool LiquidCrystal_I2C::begin(uint8_t lcd_colums, uint8_t lcd_rows, lcd_font_siz
   /* 
   HD44780/WH160xB & etc need ~40ms after voltage rises above 2.7v
   some Arduino can start runing at 2.4v, so we'll wait 0.5 seconds
-  NB: max. delay is 65535 us
   */
   delay(500);
 
