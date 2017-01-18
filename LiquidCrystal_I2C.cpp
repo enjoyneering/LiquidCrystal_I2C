@@ -176,6 +176,7 @@ bool LiquidCrystal_I2C::begin(uint8_t lcd_colums, uint8_t lcd_rows, lcd_font_siz
   FIRST ATTEMPT: set 8 bit mode. wait min 4.1ms
   some LCDs need more than 4.5ms. so we'll wait 7ms
   NB: used for Hitachi & Winstar
+      max. delay is 65535 us
   */
   send(LCD_INSTRUCTION_WRITE, LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delayMicroseconds(7000);
