@@ -15,8 +15,6 @@
           the following components between the Vcc & GND rails.
         - Connect a large capacitor ~470uF x 10v across the Vcc & GND to minimize voltage fluctuations
         - Connect a small 0.1uF decoupling capacitor across the Vcc & GND, very close to the ESP pins
-        - Skipping thouse components will cause the ESP8266 resets,
-          then missing.
 */
 /***************************************************************************************************/
 #include <Wire.h> 
