@@ -123,16 +123,16 @@ typedef enum
   PCF8574_ADDR_A20_A11_A01 = 0x23,    //I2C address. A2 = 0, A1 = 1, A0 = 1
   PCF8574_ADDR_A20_A11_A00 = 0x22,    //I2C address. A2 = 0, A1 = 1, A0 = 0
   PCF8574_ADDR_A20_A10_A01 = 0x21,    //I2C address. A2 = 0, A1 = 0, A0 = 1
-  PCF8574_ADDR_A20_A10_A00 = 0x20     //I2C address. A2 = 0, A1 = 0, A0 = 0
-	  
-PCF8574A_ADDR_A21_A11_A01 = 0x3F,    //I2C address. A2 = 1, A1 = 1, A0 = 1
-  PCF8574A_ADDR_A21_A11_A00 = 0x3E,    //I2C address. A2 = 1, A1 = 1, A0 = 0
-  PCF8574A_ADDR_A21_A10_A01 = 0x3D,    //I2C address. A2 = 1, A1 = 0, A0 = 1
-  PCF8574A_ADDR_A21_A10_A00 = 0x3C,    //I2C address. A2 = 1, A1 = 0, A0 = 0
-  PCF8574A_ADDR_A20_A11_A01 = 0x3B,    //I2C address. A2 = 0, A1 = 1, A0 = 1
-  PCF8574A_ADDR_A20_A11_A00 = 0x3A,    //I2C address. A2 = 0, A1 = 1, A0 = 0
-  PCF8574A_ADDR_A20_A10_A01 = 0x39,    //I2C address. A2 = 0, A1 = 0, A0 = 1
-  PCF8574A_ADDR_A20_A10_A00 = 0x38     //I2C address. A2 = 0, A1 = 0, A0 = 0
+  PCF8574_ADDR_A20_A10_A00 = 0x20,     //I2C address. A2 = 0, A1 = 0, A0 = 0
+
+  PCF8574A_ADDR_A21_A11_A01 = 0x3F,   //I2C address. A2 = 1, A1 = 1, A0 = 1
+  PCF8574A_ADDR_A21_A11_A00 = 0x3E,   //I2C address. A2 = 1, A1 = 1, A0 = 0
+  PCF8574A_ADDR_A21_A10_A01 = 0x3D,   //I2C address. A2 = 1, A1 = 0, A0 = 1
+  PCF8574A_ADDR_A21_A10_A00 = 0x3C,   //I2C address. A2 = 1, A1 = 0, A0 = 0
+  PCF8574A_ADDR_A20_A11_A01 = 0x3B,   //I2C address. A2 = 0, A1 = 1, A0 = 1
+  PCF8574A_ADDR_A20_A11_A00 = 0x3A,   //I2C address. A2 = 0, A1 = 1, A0 = 0
+  PCF8574A_ADDR_A20_A10_A01 = 0x39,   //I2C address. A2 = 0, A1 = 0, A0 = 1
+  PCF8574A_ADDR_A20_A10_A00 = 0x38    //I2C address. A2 = 0, A1 = 0, A0 = 0
 }
 PCF8574_address;
 
