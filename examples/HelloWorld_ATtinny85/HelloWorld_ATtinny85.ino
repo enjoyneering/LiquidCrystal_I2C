@@ -26,8 +26,6 @@ uint8_t led = 1;  //connect led to ATtiny85 pin no.6 in series with 470 Ohm resi
 
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
-
-
 void setup()
 {
   pinMode(led, OUTPUT);
@@ -47,7 +45,6 @@ void setup()
   lcd.setCursor(0, 1);                 //set 1-st colum & 2-nd row. NOTE: 1-st colum & row started at zero
   lcd.print("Random number:");
 }
-
 
 void loop()
 {
