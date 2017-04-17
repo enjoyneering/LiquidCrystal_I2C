@@ -1,19 +1,22 @@
-/******************************************************************************/
+/***************************************************************************************************/
 /*
-  PCF8574 chip uses I2C bus to communicate, 2 pins are required to  
-  interface.
+  PCF8574 chip uses I2C bus to communicate, 2 pins are required to interface
 
   Connect PCF8574 to pins :  SDA     SCL
   Uno, Mini, Pro:            A4      A5
   Mega2560, Due:             20      21
   Leonardo:                  2       3
-  ATtiny85:                  0(5)    2/A1(7) (TinyWireM   - https://github.com/SpenceKonde/TinyWireM & ATTinyCore - https://github.com/SpenceKonde/ATTinyCore)
+  ATtiny85:                  0(5)    2/A1(7) (ATTinyCore  - https://github.com/SpenceKonde/ATTinyCore
+                                              & TinyWireM - https://github.com/SpenceKonde/TinyWireM)
   ESP8266 ESP-xx:            ANY     ANY     (ESP8266Core - https://github.com/esp8266/Arduino)
-  NodeMCU 1.0:               ANY     ANY     (D1 & D2 by default)
+  NodeMCU 1.0:               ANY     ANY     (D2 & D1 by default)
 */
-/******************************************************************************/
+/***************************************************************************************************/
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+
+#define COLUMS 20
+#define ROWS   4
 
 uint8_t bell[8]    = {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00};
 uint8_t note[8]    = {0x01, 0x03, 0x05, 0x09, 0x0B, 0x1B, 0x18, 0x00};
@@ -23,38 +26,36 @@ uint8_t duck[8]    = {0x00, 0xCC, 0x1D, 0x0F, 0x0F, 0x06, 0x00, 0x00};
 uint8_t check[8]   = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
 uint8_t lock[8]    = {0x0E, 0x11, 0x11, 0x1F, 0x1B, 0x1B, 0x1F, 0x00};
 uint8_t battery[8] = {0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00};
+uint8_t temp[8]    = {0x04, 0x0A, 0x0A, 0x0A, 0x0A, 0x1F, 0x1F, 0x0E};
 
 /* some usefull icons located in the lcd ROM. NOTE: ROM content may vary, use "romPattern.ino" to find out what is in your ROM */
-uint8_t arrow_left  = 0x7E; //see p.9  of GDM2004D datasheet
-uint8_t arrow_right = 0x7F; //see p.9  of GDM2004D datasheet
-uint8_t degree      = 0xDF; //see p.9  of GDM2004D datasheet
-uint8_t alfa        = 0xE0; //see p.9  of GDM2004D datasheet
-uint8_t omega       = 0xF4; //see p.9  of GDM2004D datasheet
-uint8_t sum         = 0xF6; //see p.9  of GDM2004D datasheet
-uint8_t pi          = 0xF7; //see p.9  of GDM2004D datasheet
-uint8_t division    = 0xFD; //see p.9  of GDM2004D datasheet
-uint8_t micro       = 0xE4; //see p.9  of GDM2004D datasheet
-uint8_t sq_root     = 0xE8; //see p.9  of GDM2004D datasheet
+uint8_t arrow_left  = 0x7E; //see p.9 of GDM2004D datasheet
+uint8_t arrow_right = 0x7F; //see p.9 of GDM2004D datasheet
+uint8_t degree      = 0xDF; //see p.9 of GDM2004D datasheet
+uint8_t alfa        = 0xE0; //see p.9 of GDM2004D datasheet
+uint8_t omega       = 0xF4; //see p.9 of GDM2004D datasheet
+uint8_t sum         = 0xF6; //see p.9 of GDM2004D datasheet
+uint8_t pi          = 0xF7; //see p.9 of GDM2004D datasheet
+uint8_t division    = 0xFD; //see p.9 of GDM2004D datasheet
+uint8_t micro       = 0xE4; //see p.9 of GDM2004D datasheet
+uint8_t sq_root     = 0xE8; //see p.9 of GDM2004D datasheet
 
-uint8_t icon;
-uint8_t colums = 20;
-uint8_t rows   = 4;
+uint8_t icon        = 0;
   
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
 void setup()
 {
   Serial.begin(115200);
-  Serial.flush();
 
-  if (lcd.begin(colums, rows) != 1)
+  while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
   {
-    Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,11,12,13,14,16 are legal.");
+    Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
+    delay(5000);   
   }
-  else
-  {
-    Serial.println("PCF8574 is OK...");
-  }
+  lcd.print("PCF8574 is OK...");
+  delay(2000);
+  lcd.clear();
   
   lcd.createChar(0, bell);
   lcd.createChar(1, note);
@@ -68,7 +69,7 @@ void setup()
 
 void loop()
 {
-  lcd.setCursor(random(0, colums), random(0, rows));
+  lcd.setCursor(random(0, COLUMS), random(0, ROWS));
 
   icon = random(0, 18);
   switch(icon)
@@ -128,5 +129,5 @@ void loop()
       lcd.write(sq_root);
       break;
   }
-  delay(500);
+  delay(300);
 }
