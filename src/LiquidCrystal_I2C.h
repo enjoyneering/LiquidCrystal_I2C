@@ -1,42 +1,47 @@
-/******************************************************************************/
+/***************************************************************************************************/
 /*
-  This is an Arduino library for HD44780, S6A0069, KS0066U, NT3881D, LC7985, 
-  ST7066, SPLC780, WH160xB, AIP31066, GDM200xD, ADM0802A LCD displays, operated in 4 bit
-  mode over I2C bus with 8-bit I/O expander PCF8574. Typical displays resolutions
-  are: 8x2, 16x1, 16x2, 16x4, 20x2, 20x4 and etc.
-  written by enjoyneering79
-  These IC uses I2C bus to communicate, 2 pins are required to interface
-  Connect PCF8574 to pins :  SDA     SCL
-  Uno, Mini, Pro:            A4      A5
-  Mega2560, Due:             20      21
-  Leonardo:                  2       3
-  ATtiny85:                  0(5)    2/A1(7) (TinyWireM   - https://github.com/SpenceKonde/TinyWireM)
-  ESP8266 ESP-xx:            ANY     ANY     (ESP8266Core - https://github.com/esp8266/Arduino)
-  NodeMCU 1.0:               ANY     ANY     (D2 & D1 by default)
+  This is an Arduino library for HD44780, S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780,
+  WH160xB, AIP31066, GDM200xD, ADM0802A LCD displays.
+  Screens are operated in 4 bit mode over I2C bus with 8-bit I/O expander PCF8574.
+  Typical displays resolutions are: 8x2, 16x1, 16x2, 16x4, 20x2, 20x4 and etc.
+
+  written by : enjoyneering79
+  sourse code: https://github.com/enjoyneering/
+
+  This chip uses I2C bus to communicate, specials pins are required to interface
+  Connect chip to pins:    SDA        SCL
+  Uno, Mini, Pro:          A4         A5
+  Mega2560, Due:           20         21
+  Leonardo:                2          3
+  ATtiny85:                0(5)       2/A1(7)   (ATTinyCore  - https://github.com/SpenceKonde/ATTinyCore
+                                                 & TinyWireM - https://github.com/SpenceKonde/TinyWireM)
+  ESP8266 ESP-01:          GPIO0/D5   GPIO2/D3  (ESP8266Core - https://github.com/esp8266/Arduino)
+  NodeMCU 1.0:             GPIO4/D2   GPIO5/D1
+
   BSD license, all text above must be included in any redistribution
 */
-/******************************************************************************/
+/***************************************************************************************************/
 
 #ifndef LiquidCrystal_I2C_h
 #define LiquidCrystal_I2C_h
 
 #if ARDUINO >= 100
- #include <Arduino.h>
+#include <Arduino.h>
 #else
- #include <WProgram.h>
+#include <WProgram.h>
 #endif
 
 #if defined(__AVR_ATtinyX4__) || defined(__AVR_ATtinyX5__) || defined(__AVR_ATtinyX313__)
- #include <TinyWireM.h>
- #define  Wire TinyWireM
+#include <TinyWireM.h>
+#define  Wire TinyWireM
 #else
- #include <Wire.h>
+#include <Wire.h>
 #endif
 
 #if defined (__AVR__)
- #include <avr/pgmspace.h>
+#include <avr/pgmspace.h>
 #elif defined(ESP8266)
- #include <pgmspace.h>
+#include <pgmspace.h>
 #endif
 
 #include <inttypes.h>
@@ -147,11 +152,11 @@ class LiquidCrystal_I2C : public Print
   public:
    LiquidCrystal_I2C(PCF8574_address = PCF8574_ADDR_A21_A11_A01, uint8_t P0 = 4, uint8_t P1 = 5, uint8_t P2 = 6, uint8_t P3 = 16, uint8_t P4 = 11, uint8_t P5 = 12, uint8_t P6 = 13, uint8_t P7 = 14, switchPolarity = POSITIVE);
  
-    #if defined(ESP8266)
+   #if defined(ESP8266)
    bool begin(uint8_t lcd_colums = 16, uint8_t lcd_rows = 2, lcd_font_size = LCD_5x8DOTS, uint8_t sda = SDA, uint8_t scl = SCL);
-    #else
+   #else
    bool begin(uint8_t lcd_colums = 16, uint8_t lcd_rows = 2, lcd_font_size = LCD_5x8DOTS);
-    #endif
+   #endif
    void clear(void);
    void home(void);
    void noDisplay(void);
@@ -175,16 +180,21 @@ class LiquidCrystal_I2C : public Print
    void createChar(uint8_t, uint8_t[]);
    void setCursor(uint8_t, uint8_t);
 
-   /* Arduino class "Print" calls func. <write()> to send characters to the LCD */
-   size_t write(uint8_t);
-   size_t print(uint8_t);
+   /* Arduino class "Print" calls func. "write()" to send characters to the LCD */
+   #if defined(ARDUINO) && ARDUINO >= 100
+   size_t write(uint8_t value);
+   size_t print(uint8_t value);
+   #else
+   void write(uint8_t value);
+   void print(uint8_t value);
+   #endif
    using  Print::write;
    using  Print::print;
 
    /* Arduino Unsupported API functions */
-   void    setBrightness(uint8_t pin, uint8_t value, switchPolarity);
-   void    printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
-   void    printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
+   void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
+   void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
+   void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
 	 
 
   private:
@@ -201,6 +211,7 @@ class LiquidCrystal_I2C : public Print
    lcd_font_size   _lcd_font_size;
    switchPolarity  _switchPolarity;
 
+   void    initialization(void);
    void    send(uint8_t mode, uint8_t value, uint8_t length);
    uint8_t portMapping(uint8_t value);
    void    writePCF8574(uint8_t value);
