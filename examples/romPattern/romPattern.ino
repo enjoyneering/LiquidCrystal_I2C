@@ -1,19 +1,16 @@
 /***************************************************************************************************/
 /*
-  written by : enjoyneering79
-  sourse code: https://github.com/enjoyneering/
+  This is an Arduino sketch for LiquidCrystal_I2C library.
 
-  This chip uses I2C bus to communicate. Two pins are required to interface
-
-  Connect chip to pins:    SDA     SCL
-  Uno, Mini, Pro:          A4      A5
-  Mega2560, Due:           20      21
-  Leonardo:                2       3
-  ATtiny85:                0(5)    2/A1(7) (ATTinyCore  - https://github.com/SpenceKonde/ATTinyCore
-                                            & TinyWireM - https://github.com/SpenceKonde/TinyWireM)
-  ESP8266 ESP-xx:          ANY     ANY     (ESP8266Core - https://github.com/esp8266/Arduino)
-  NodeMCU 1.0:             ANY     ANY     (D2 & D1 by default)
-
+  PCF8574 chip uses I2C bus to communicate, specials pins are required to interface
+  Connect chip to pins:    SDA        SCL
+  Uno, Mini, Pro:          A4         A5
+  Mega2560, Due:           20         21
+  Leonardo:                2          3
+  ATtiny85:                0(5)       2/A1(7)   (ATTinyCore  - https://github.com/SpenceKonde/ATTinyCore
+                                                 & TinyWireM - https://github.com/SpenceKonde/TinyWireM)
+  ESP8266 ESP-01:          GPIO0/D5   GPIO2/D3  (ESP8266Core - https://github.com/esp8266/Arduino)
+  NodeMCU 1.0:             GPIO4/D2   GPIO5/D1
 */
 /***************************************************************************************************/
 #include <Wire.h> 
