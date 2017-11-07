@@ -99,7 +99,6 @@
 #define LCD_CMD_LENGTH_4BIT      4    //4bit command length
 #define LCD_POLL_LIMIT           8    //i2c retry limit
 
-
 /* LCD_INSTRUCTION_WRITE controls */
 typedef enum
 {
@@ -108,13 +107,11 @@ typedef enum
 }
 lcd_font_size;
 
-
 /* PCF8574 controls */
 #define LCD_BACKLIGHT_ON   0x01
 #define LCD_BACKLIGHT_OFF  0x00
 #define PCF8574_ALL_LOW    0x00       //Sets all PCF8574 pins to LOW
 #define PCF8574_DATA_HIGH  0x3E       //Sets lcd pins E, DB7, DB6, DB5, DB4 to HIGH
-
 
 /* PCF8574 addresses */
 typedef enum
@@ -139,7 +136,6 @@ typedef enum
 }
 PCF8574_address;
 
-
 /* PCF8574 backlight controls - transistor switching polarity */
 typedef enum
 {
@@ -147,7 +143,6 @@ typedef enum
   NEGATIVE = 0x00
 }
 switchPolarity;
-
 
 class LiquidCrystal_I2C : public Print 
 {
@@ -198,7 +193,6 @@ class LiquidCrystal_I2C : public Print
    void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
-
   private:
    uint8_t _displayFunction;
    uint8_t _displayControl;
