@@ -17,6 +17,7 @@
                                                  & TinyWireM - https://github.com/SpenceKonde/TinyWireM)
   ESP8266 ESP-01:          GPIO0/D5   GPIO2/D3  (ESP8266Core - https://github.com/esp8266/Arduino)
   NodeMCU 1.0:             GPIO4/D2   GPIO5/D1
+  WeMos D1 Mini:           GPIO4/D2   GPIO5/D1
 
   BSD license, all text above must be included in any redistribution
 */
@@ -38,7 +39,7 @@
 #include <Wire.h>
 #endif
 
-#if defined (__AVR__)
+#if defined(__AVR__)
 #include <avr/pgmspace.h>
 #elif defined(ESP8266)
 #include <pgmspace.h>
@@ -96,6 +97,7 @@
 #define LCD_EN_PULSE_DELAY       1    //Duration of the En pulse, in microseconds. Must be > 450ns
 #define LCD_CMD_LENGTH_8BIT      8    //8bit command length
 #define LCD_CMD_LENGTH_4BIT      4    //4bit command length
+#define LCD_POLL_LIMIT           8    //i2c retry limit
 
 
 /* LCD_INSTRUCTION_WRITE controls */
@@ -191,10 +193,17 @@ class LiquidCrystal_I2C : public Print
    using  Print::write;
    using  Print::print;
 
+   /*
+   size_t writeln(uint8_t);
+   size_t println(uint8_t);
+   using  Print::writeln;
+   using  Print::println;
+   */
+
    /* Arduino Unsupported API functions */
-   void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
+   void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
 
   private:
@@ -216,8 +225,6 @@ class LiquidCrystal_I2C : public Print
    uint8_t portMapping(uint8_t value);
    void    writePCF8574(uint8_t value);
    uint8_t readPCF8574(void);
-   bool    readBusyFlag(void);
-   uint8_t readAddressCounter(void);
 };
 
 #endif
