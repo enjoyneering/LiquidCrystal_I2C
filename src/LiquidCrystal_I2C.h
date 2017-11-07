@@ -193,13 +193,6 @@ class LiquidCrystal_I2C : public Print
    using  Print::write;
    using  Print::print;
 
-   /*
-   size_t writeln(uint8_t);
-   size_t println(uint8_t);
-   using  Print::writeln;
-   using  Print::println;
-   */
-
    /* Arduino Unsupported API functions */
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
