@@ -13,10 +13,11 @@
   Uno, Mini, Pro:          A4         A5
   Mega2560, Due:           20         21
   Leonardo:                2          3
-  ATtiny85:                0(5)       2/A1(7)   (ATTinyCore  - https://github.com/SpenceKonde/ATTinyCore
-                                                 & TinyWireM - https://github.com/SpenceKonde/TinyWireM)
-  ESP8266 ESP-01:          GPIO0/D5   GPIO2/D3  (ESP8266Core - https://github.com/esp8266/Arduino)
-  NodeMCU 1.0:             GPIO4/D2   GPIO5/D1
+  ATtiny85:                5/PB0      7/PB2     (ATTinyCore    - https://github.com/SpenceKonde/ATTinyCore
+                                                 TinyWireM     - https://github.com/SpenceKonde/TinyWireM)
+  ESP8266 ESP-01:          D5/GPIO0   D3/GPIO2  (ESP8266Core   - https://github.com/esp8266/Arduino)
+  NodeMCU 1.0:             D2/GPIO4   D1/GPIO5
+  WeMos D1 Mini:           D2/GPIO4   D1/GPIO5
 
   BSD license, all text above must be included in any redistribution
 */
@@ -121,7 +122,7 @@ bool LiquidCrystal_I2C::begin(uint8_t lcd_colums, uint8_t lcd_rows, lcd_font_siz
 bool LiquidCrystal_I2C::begin(uint8_t lcd_colums, uint8_t lcd_rows, lcd_font_size f_size)
 {
   Wire.begin();
-  Wire.setClock(100000UL);                  //experimental! AVR i2c bus speed: AVR 31kHz..400kHz/31000UL..400000UL, default 100000UL
+  Wire.setClock(400000UL);                  //experimental! AVR i2c bus speed: AVR 31kHz..400kHz/31000UL..400000UL, default 100000UL
 #endif
   if (_PCF8574_initialisation == false)     //safety check - make sure the declaration of lcd pins is right
   {
@@ -158,11 +159,6 @@ void LiquidCrystal_I2C::clear(void)
 {
   send(LCD_INSTRUCTION_WRITE, LCD_CLEAR_DISPLAY, LCD_CMD_LENGTH_8BIT);
   delayMicroseconds(LCD_HOME_CLEAR_DELAY);
-
-  /* to avoid blocking ESP8266 TCP/IP stack */
-  #if defined(ESP8266)
-  yield();
-  #endif
 }
 
 /**************************************************************************/
@@ -178,11 +174,6 @@ void LiquidCrystal_I2C::home(void)
 {
   send(LCD_INSTRUCTION_WRITE, LCD_RETURN_HOME, LCD_CMD_LENGTH_8BIT);
   delayMicroseconds(LCD_HOME_CLEAR_DELAY);
-
-  /* to avoid blocking ESP8266 TCP/IP stack */
-  #if defined(ESP8266)
-  yield();
-  #endif
 }
 
 /**************************************************************************/
@@ -503,11 +494,6 @@ void LiquidCrystal_I2C::initialization(void)
   send(LCD_INSTRUCTION_WRITE, LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delayMicroseconds(7000);
 
-  /* to avoid blocking ESP8266 TCP/IP stack */
-  #if defined(ESP8266)
-  yield();
-  #endif
-
   /*
   SECOND ATTEMPT: set 8 bit mode
   wait min 100us.
@@ -522,11 +508,6 @@ void LiquidCrystal_I2C::initialization(void)
   */
   send(LCD_INSTRUCTION_WRITE, LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delayMicroseconds(250);
-
-  /* to avoid blocking ESP8266 TCP/IP stack */
-  #if defined(ESP8266)
-  yield();
-  #endif
 	
   /*
   FINAL ATTEMPT: set 4-bit interface
@@ -585,11 +566,6 @@ void LiquidCrystal_I2C::initialization(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
 {
-  /* to avoid blocking ESP8266 TCP/IP stack */
-  #if defined(ESP8266)
-  yield();
-  #endif
-
   uint8_t data = 0;
   uint8_t msb  = 0;
   uint8_t lsb  = 0;
@@ -613,12 +589,7 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
     bitClear(data, (_LCD_TO_PCF8574[2]));  //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
     writePCF8574(data);                    //execute command
     delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
-  }
-
-  /* to avoid blocking ESP8266 TCP/IP stack */
-  #if defined(ESP8266)
-  yield();
-  #endif	
+  }	
 }
 
 /**************************************************************************/
@@ -659,11 +630,12 @@ uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
 /**************************************************************************/
 void LiquidCrystal_I2C::writePCF8574(uint8_t value)
 {
-  uint8_t pollCounter = 10;
+  int8_t pollCounter = LCD_POLL_LIMIT;
 
   do
   {
     pollCounter--;
+    if (pollCounter == 0) return; 
 
     Wire.beginTransmission(_PCF8574_address);
     #if ARDUINO >= 100
@@ -672,7 +644,7 @@ void LiquidCrystal_I2C::writePCF8574(uint8_t value)
     Wire.send(value | _backlightValue);
     #endif
   }
-  while (Wire.endTransmission(true) != 0 || pollCounter > 0);
+  while (Wire.endTransmission(true) != 0);
 }
 
 /**************************************************************************/
@@ -693,15 +665,16 @@ void LiquidCrystal_I2C::writePCF8574(uint8_t value)
 /**************************************************************************/
 uint8_t LiquidCrystal_I2C::readPCF8574()
 {
-  uint8_t pollCounter = 10;
+  int8_t pollCounter = LCD_POLL_LIMIT;
 
   do
   {
     pollCounter--;
-	  
-    Wire.requestFrom(_PCF8574_address, 1, true);    //true = stop message after transmission & releas the I2C bus   
+    if (pollCounter == 0) return 0; 
+
+    Wire.requestFrom(_PCF8574_address, 1, true); //true = stop message after transmission & releas the I2C bus   
   }
-  while (Wire.available() != 1 || pollCounter > 0); //check rxBuffer
+  while (Wire.available() != 1);                 //check rxBuffer
 
   /* reads byte from "wire.h" rxBuffer */
   #if ARDUINO >= 100
@@ -709,64 +682,6 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
   #else
   return Wire.receive();
   #endif
-}
-
-/**************************************************************************/
-/*
-    LCD - readBusyFlag()
-
-    Checks the LCD's Busy Flag (BF). Retuns: 1 - busy, 0 - ready.   
-    Contents of address counter (cursor position) also can be read. 
-
-    NOTE: To retrive the BF, set RS = 0 & RW = 1
-
-          DB7 pin = 1     - Internaly operated (busy)
-          DB7 pin = 0     - Next instruction accepted (ready)
-          address counter - DB6, DB5, DB4, DB3, DB2, DB1, DB0
-*/
-/**************************************************************************/
-bool LiquidCrystal_I2C::readBusyFlag()
-{
-  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT);
-
-  return bitRead(readPCF8574(), _LCD_TO_PCF8574[3]);
-}
-
-/**************************************************************************/
-/*
-    LCD - readAddressCounter()
-
-    Returns the contents of address counter (cursor position)
-
-    NOTE: To retrive address counter, set RS = 0 & RW = 1
-
-          DB7 pin = 1     - Internaly operated (busy)
-          DB7 pin = 0     - Next instruction accepted (ready)
-          address counter - DB6, DB5, DB4, DB3, DB2, DB1, DB0
-*/
-/**************************************************************************/
-uint8_t LiquidCrystal_I2C::readAddressCounter()
-{
-  uint8_t data  = 0;
-  uint8_t value = 0;
-
-  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT);
-  data = readPCF8574();
-
-  for (uint8_t i = 4; i < 7; i++)  //D6, D5, D4
-  {
-    bitWrite(value, 10 - i, bitRead(data, _LCD_TO_PCF8574[i]));
-  }
-
-  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT);
-  data = readPCF8574();
-
-  for (uint8_t i = 3; i < 7; i++) //D3, D2, D1, D0
-  {
-    bitWrite(value, 6 - i, bitRead(data, _LCD_TO_PCF8574[i]));
-  }
-
-  return value;
 }
 
 /* !!! Arduino Unsupported API functions !!! */
@@ -780,6 +695,8 @@ void LiquidCrystal_I2C::printHorizontalGraph(char name, uint8_t row, uint16_t cu
 {
     uint16_t currentGraph = 0;
     uint8_t  colum        = 0;
+
+    if (currentValue > maxValue) currentValue = maxValue;
 
     currentGraph = map(currentValue, 0, maxValue, 0, _lcd_colums);
 
@@ -819,7 +736,8 @@ void LiquidCrystal_I2C::printVerticalGraph(uint8_t colum, uint8_t row, uint16_t 
   uint8_t verticalBar_7[8] = {0x00,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F};
   uint8_t verticalBar_8[8] = {0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F};
 
-
+  if (currentValue > maxValue) currentValue = maxValue;
+	
   currentGraph = map(currentValue, 0, maxValue, 0, 8);
   switch(currentGraph)
   {
