@@ -15,7 +15,7 @@
   Mega2560, Due............................ 20                     21
   Leonardo................................. 2                      3
   Trinket/ATtiny85......................... 0/physical pin no.5    2/physical pin no.7
-  Blue Pill/STM32F103xxxx boards........... B7                     B6
+  Blue Pill/STM32F103xxxx boards........... B7                     B6 with 5v->3v logich converter
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
@@ -43,8 +43,6 @@
 #if defined(__AVR_ATtinyX4__) || defined(__AVR_ATtinyX5__) || defined(__AVR_ATtinyX7__) || defined(__AVR_ATtinyX313__)
   #include <TinyWireM.h>
   #define Wire TinyWireM
-#elif defined(_VARIANT_ARDUINO_STM32_)
-  #include <Wire_slave.h>
 #else
   #include <Wire.h>
 #endif
@@ -220,9 +218,8 @@ class LiquidCrystal_I2C : public Print
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
   private:
-   uint8_t _displayFunction = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4=(DL), DB3=(N), DB2=(F), DB1,       DB0
-   uint8_t _displayControl  = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4,      DB3,     DB2=(D), DB1=(C),   DB0=(B)
-   uint8_t _displayMode     = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4,      DB3,     DB2,     DB1=(I/D), DB0=(S)
+   uint8_t _displayControl  = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2=(D), DB1=(C),   DB0=(B)
+   uint8_t _displayMode     = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2,     DB1=(I/D), DB0=(S)
    uint8_t _lcd_colums;
    uint8_t _lcd_rows;
    uint8_t _backlightValue;
