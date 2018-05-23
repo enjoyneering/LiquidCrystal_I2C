@@ -55,9 +55,9 @@ void setup()
   lcd_01.setCursor(0, 2);
   lcd_01.print("Random number:");
 
-  lcd_02.setCursor(0, 1);
+  lcd_02.setCursor(0, 0);
   lcd_02.print("LCD2 Hello world");
-  lcd_02.setCursor(0, 2);
+  lcd_02.setCursor(0, 1);
   lcd_02.print("Random number:");
 }
 
@@ -68,7 +68,7 @@ void loop()
   lcd_01.print(random(10, 1000));
   lcd_01.write(LCD_SPACE_SYMBOL);
 
-  lcd_02.setCursor(14, 2);             //set 15-th colum & 3-rd  row. NOTE: 1-st colum & row started at zero
+  lcd_02.setCursor(14, 1);             //set 15-th colum & 2-rd  row. NOTE: 1-st colum & row started at zero
   lcd_02.print(random(10, 1000));
   lcd_02.write(LCD_SPACE_SYMBOL);
 
