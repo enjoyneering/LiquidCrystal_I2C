@@ -62,7 +62,7 @@ void setup()
 void loop()
 {
   /* prints dynamic text */
-  lcd.setCursor(14, 2);         //set 15-th colum & 3-rd  row. NOTE: 1-st colum & row started at zero
+  lcd.setCursor(14, 2);          //set 15-th colum & 3-rd  row. NOTE: 1-st colum & row started at zero
   lcd.print(random(10, 1000));
   lcd.write(LCD_SPACE_SYMBOL);
 
