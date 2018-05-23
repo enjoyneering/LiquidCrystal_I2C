@@ -15,7 +15,7 @@
   Mega2560, Due............................ 20                     21
   Leonardo................................. 2                      3
   Trinket/ATtiny85......................... 0/physical pin no.5    2/physical pin no.7
-  Blue Pill/STM32F103xxxx boards........... B7                     B6
+  Blue Pill/STM32F103xxxx boards........... B7                     B6 with 5v->3v logich converter
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
@@ -533,53 +533,55 @@ void LiquidCrystal_I2C::write(uint8_t value)
 /**************************************************************************/
 void LiquidCrystal_I2C::initialization(void)
 {
+  uint8_t displayFunction = 0; //don't change!!! default bits value DB7, DB6, DB5, DB4=(DL), DB3=(N), DB2=(F), DB1, DB0
+
   /*
-  HD44780/WH160xB & etc need ~40ms after voltage rises above 2.7v
-  some Arduino can start & run the code at 2.4v, so we'll wait 700ms
+     HD44780/WH160xB & etc need ~40ms after voltage rises above 2.7v
+     some Arduino can start & run the code at 2.4v, so we'll wait 700ms
   */
   delay(700);
 
   /*
-  FIRST ATTEMPT: set 8 bit mode
-  wait min 4.1ms some LCDs need more than 4.5ms. so we'll wait 7ms
-  NB: - used for Hitachi & Winstar
+     FIRST ATTEMPT: set 8-bit mode
+     wait min 4.1ms some LCDs need more than 4.5ms. so we'll wait 7ms
+     NB: used for Hitachi & Winstar
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delay(7);
 
   /*
-  SECOND ATTEMPT: set 8 bit mode
-  wait min 100us.
-  NB: - used for Hitachi only (not needed for Winstar displays)
+     SECOND ATTEMPT: set 8-bit mode
+     wait min 100us.
+     NB: used for Hitachi only, not needed for Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delayMicroseconds(350);
 	
   /*
-  THIRD ATTEMPT: set 8 bit mode
-  NB: - used for Hitachi only (not needed for Winstar displays)
+     THIRD ATTEMPT: set 8 bit mode
+     NB: used for Hitachi only, not needed for Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delayMicroseconds(250);
 	
   /*
-  FINAL ATTEMPT: set 4-bit interface
-  Busy Flag can be checked after this instruction
+     FINAL ATTEMPT: set 4-bit interface
+     NB: Busy Flag can be checked after this instruction
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_4BIT_MODE, LCD_CMD_LENGTH_4BIT);
 
   /* sets qnt. of lines, 1 line by default */
-  if (_lcd_rows > 1) _displayFunction |= LCD_2_LINE;   //line bit located at BD3 & zero by default
+  if (_lcd_rows > 1) displayFunction |= LCD_2_LINE;   //line bit located at BD3 & zero by default
 
   /* sets font size, 5x8 by default */
   if (_lcd_font_size == LCD_5x10DOTS)
   {
-    _displayFunction |= LCD_5x10DOTS;                   //font bit located at BD2
-    if(_lcd_rows != 1) _displayFunction &= ~LCD_2_LINE; //safety check, two rows displays can't display 10 pixel font
+    displayFunction |= LCD_5x10DOTS;                   //font bit located at BD2
+    if(_lcd_rows != 1) displayFunction &= ~LCD_2_LINE; //safety check, two rows displays can't display 10 pixel font
   }
 
   /* initializes lcd functions: qnt. of lines, font size, etc. (can't be changed after this point) */
-  send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_4BIT_MODE | _displayFunction, LCD_CMD_LENGTH_8BIT);
+  send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_4BIT_MODE | displayFunction, LCD_CMD_LENGTH_8BIT);
 	
   /* initializes lcd controls: turn display off, underline cursor off & blinking cursor off (by default) */
   _displayControl = LCD_UNDERLINE_CURSOR_OFF | LCD_BLINK_CURSOR_OFF;
@@ -694,7 +696,11 @@ void LiquidCrystal_I2C::writePCF8574(uint8_t value)
     Wire.send(value | _backlightValue);
     #endif
   }
+  #if defined(_VARIANT_ARDUINO_STM32_)
+  while ((Wire.endTransmission() != 0) || (pollCounter > 0));
+  #else
   while ((Wire.endTransmission(true) != 0) || (pollCounter > 0));
+  #endif
 }
 
 /**************************************************************************/
@@ -722,7 +728,11 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
   {
     if (pollCounter-- == 0) return 0;            //fail to read
 
-    Wire.requestFrom(_PCF8574_address, 1, true); //true = stop message after transmission & releas the I2C bus   
+    #if defined(_VARIANT_ARDUINO_STM32_)
+    Wire.requestFrom(_PCF8574_address, 1);
+    #else
+    Wire.requestFrom(_PCF8574_address, 1, true); //true = stop message after transmission & releas the I2C bus
+    #endif  
   }
   while (Wire.available() != 1);                 //check "wire.h" rxBuffer
 
