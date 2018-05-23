@@ -37,7 +37,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS1) != 1) //colums - 20, rows - 4, pixels - 5x8, connect B7/B6 to PCF8574 via 5v->3v logich converter or in series with 10kOhm resistors
+  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, connect B7/B6 to PCF8574 via 5v->3v logich converter or in series with 10kOhm resistors
   {
     Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
     delay(5000);
