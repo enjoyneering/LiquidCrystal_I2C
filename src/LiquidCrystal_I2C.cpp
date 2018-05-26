@@ -13,9 +13,9 @@
   Board:                                    SDA                    SCL
   Uno, Mini, Pro........................... A4                     A5
   Mega2560, Due............................ 20                     21
-  Leonardo................................. 2                      3
-  Trinket/ATtiny85......................... 0/physical pin no.5    2/physical pin no.7
-  Blue Pill/STM32F103xxxx boards........... B7                     B6 with 5v->3v logich converter
+  Leonardo, Micro, ATmega32U4.............. 2                      3
+  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
+  Blue Pill, STM32F103xxxx boards.......... B7                     B6 with 5v->3v logich converter
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
