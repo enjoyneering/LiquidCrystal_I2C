@@ -11,17 +11,19 @@
 
   This chip uses I2C bus to communicate, specials pins are required to interface
   Board:                                    SDA                    SCL
-  Uno, Mini, Pro........................... A4                     A5
+  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5
   Mega2560, Due............................ 20                     21
   Leonardo, Micro, ATmega32U4.............. 2                      3
   Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
-  Blue Pill, STM32F103xxxx boards.......... B7                     B6 with 5v->3v logich converter
+  Blue Pill, STM32F103xxxx boards.......... B7*                    B6*
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
+                                            *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
+                                             logic level converter is recomended
+
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
-  ATtiny I2C Master lib - https://github.com/SpenceKonde/TinyWireM
   ESP8266 Core          - https://github.com/esp8266/Arduino
   ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
@@ -35,26 +37,20 @@
 #define LiquidCrystal_I2C_h
 
 #if defined(ARDUINO) && ARDUINO >= 100 //arduino core v1.0 or later
-  #include <Arduino.h>
+#include <Arduino.h>
 #else
-  #include <WProgram.h>
-#endif
-
-#if defined(__AVR_ATtinyX4__) || defined(__AVR_ATtinyX5__) || defined(__AVR_ATtinyX7__) || defined(__AVR_ATtinyX313__)
-  #include <TinyWireM.h>
-  #define Wire TinyWireM
-#else
-  #include <Wire.h>
+#include <WProgram.h>
 #endif
 
 #if defined(__AVR__)
-  #include <avr/pgmspace.h>            //use for PROGMEM Arduino AVR
+#include <avr/pgmspace.h>              //use for PROGMEM Arduino AVR
 #elif defined(ESP8266)
-  #include <pgmspace.h>                //use for PROGMEM Arduino ESP8266
+#include <pgmspace.h>                  //use for PROGMEM Arduino ESP8266
 #elif defined(_VARIANT_ARDUINO_STM32_)
-  #include <avr/pgmspace.h>            //use for PROGMEM Arduino STM32
+#include <avr/pgmspace.h>              //use for PROGMEM Arduino STM32
 #endif
 
+#include <Wire.h>
 #include <inttypes.h>
 #include <Print.h>
 
@@ -135,10 +131,10 @@ lcd_font_size;
 #define LCD_I2C_POLLING_LIMIT    8    //i2c retry limit
 
 /* PCF8574 controls */
-#define LCD_BACKLIGHT_ON   0x01
-#define LCD_BACKLIGHT_OFF  0x00
-#define PCF8574_ALL_LOW    0x00       //Sets all PCF8574 pins to LOW
-#define PCF8574_DATA_HIGH  0x3E       //Sets lcd pins E, DB7, DB6, DB5, DB4 to HIGH
+#define LCD_BACKLIGHT_ON         0x01
+#define LCD_BACKLIGHT_OFF        0x00
+#define PCF8574_ALL_LOW          0x00 //sets all PCF8574 pins to LOW
+#define PCF8574_DATA_HIGH        0x3E //sets lcd pins E, DB7, DB6, DB5, DB4 to HIGH
 
 /* PCF8574 addresses */
 typedef enum
@@ -163,11 +159,11 @@ typedef enum
 }
 PCF8574_address;
 
-/* PCF8574 backlight controls - transistor switching polarity */
+/* PCF8574 backlight controls */
 typedef enum
 {
-  POSITIVE = 0x01,
-  NEGATIVE = 0x00
+  POSITIVE = 0x01,                    //transistor switching polarity positive
+  NEGATIVE = 0x00                     //transistor switching polarity negative
 }
 switchPolarity;
 
@@ -200,8 +196,7 @@ class LiquidCrystal_I2C : public Print
    void shiftDecrement(void);
    void autoscroll(void);
    void noAutoscroll(void); 
-   void createChar(uint8_t  CGRAM_address, uint8_t  char_pattern[]);
-   void createChar(uint16_t CGRAM_address, uint8_t *char_pattern[]);
+   void createChar(uint8_t CGRAM_address, const uint8_t *char_pattern);
    void noBacklight(void);
    void backlight(void);
 
@@ -211,6 +206,10 @@ class LiquidCrystal_I2C : public Print
    #else
    virtual void write(uint8_t value);
    #endif
+
+   /*
+   size_t writeln(uint8_t);
+   */
 
    /* Arduino Unsupported API functions */
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
