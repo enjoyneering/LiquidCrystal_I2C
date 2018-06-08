@@ -11,17 +11,19 @@
 
   This chip uses I2C bus to communicate, specials pins are required to interface
   Board:                                    SDA                    SCL
-  Uno, Mini, Pro........................... A4                     A5
+  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5
   Mega2560, Due............................ 20                     21
   Leonardo, Micro, ATmega32U4.............. 2                      3
   Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
-  Blue Pill, STM32F103xxxx boards.......... B7                     B6 with 5v->3v logich converter
+  Blue Pill, STM32F103xxxx boards.......... B7*                    B6*
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
+                                            *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
+                                             logic level converter is recomended
+
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
-  ATtiny I2C Master lib - https://github.com/SpenceKonde/TinyWireM
   ESP8266 Core          - https://github.com/esp8266/Arduino
   ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
@@ -404,7 +406,7 @@ void LiquidCrystal_I2C::noAutoscroll(void)
     - 4 locations for 5x10DOTS display, at index 0-3
 */
 /**************************************************************************/
-void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, uint8_t char_pattern[])
+void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pattern)
 {
   uint8_t CGRAM_capacity = 0;
   uint8_t font_size      = 0;
@@ -432,11 +434,6 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, uint8_t char_pattern[]
   {
     send(LCD_DATA_WRITE, char_pattern[i], LCD_CMD_LENGTH_8BIT);                                //write data to CGRAM address
   }
-}
-
-void LiquidCrystal_I2C::createChar(uint16_t CGRAM_address, uint8_t *char_pattern[])
-{
-  createChar((uint8_t)CGRAM_address, char_pattern);
 }
 
 /**************************************************************************/
