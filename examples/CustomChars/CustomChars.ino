@@ -4,17 +4,19 @@
 
   PCF8574 chip uses I2C bus to communicate, specials pins are required to interface
   Board:                                    SDA                    SCL
-  Uno, Mini, Pro........................... A4                     A5
+  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5
   Mega2560, Due............................ 20                     21
-  Leonardo................................. 2                      3
-  Trinket/ATtiny85......................... 0/physical pin no.5    2/physical pin no.7
-  Blue Pill/STM32F103xxxx boards........... B7                     B6 with 5v->3v logich converter
+  Leonardo, Micro, ATmega32U4.............. 2                      3
+  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
+  Blue Pill, STM32F103xxxx boards.......... B7*                    B6*
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
+                                            *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
+                                             logic level converter is recomended
+
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
-  ATtiny I2C Master lib - https://github.com/SpenceKonde/TinyWireM
   ESP8266 Core          - https://github.com/esp8266/Arduino
   ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
@@ -23,12 +25,14 @@
   - https://www.gnu.org/licenses/licenses.html
 */
 /***************************************************************************************************/
+#pragma GCC optimize ("O2")    //code optimisation controls - "O2" & "O3" code performance, "Os" code size
+
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
 /* 
    Some usefull icons located in the LCD ROM, see p.9 of GDM2004D datasheet for details
-   NOTE: your LCD ROM could be different, use "romPattern.ino" to find out what is in your ROM
+   NOTE: your LCD could be different, use "romPattern.ino" example to find out what is in your ROM
 */
 #define ARROW_LEFT  0x7E
 #define ARROW_RIGHT 0x7F
@@ -36,7 +40,7 @@
 #define ALFA        0xE0
 #define OMEGA       0xF4
 #define SUM         0xF6
-#define PI          0xF7
+#define PI_SIGN     0xF7
 #define DIVISION    0xFD
 #define MICRO       0xE4
 #define SQ_ROOT     0xE8
@@ -45,17 +49,17 @@
 #define COLUMS      20
 #define ROWS        4
 
-uint8_t bell[8]    = {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00};
-uint8_t note[8]    = {0x01, 0x03, 0x05, 0x09, 0x0B, 0x1B, 0x18, 0x00};
-uint8_t clock[8]   = {0x00, 0x0E, 0x15, 0x17, 0x11, 0x0E, 0x00, 0x00};
-uint8_t heart[8]   = {0x00, 0x0A, 0x1F, 0x1F, 0x0E, 0x04, 0x00, 0x00};
-uint8_t duck[8]    = {0x00, 0xCC, 0x1D, 0x0F, 0x0F, 0x06, 0x00, 0x00};
-uint8_t check[8]   = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
-uint8_t lock[8]    = {0x0E, 0x11, 0x11, 0x1F, 0x1B, 0x1B, 0x1F, 0x00};
-uint8_t battery[8] = {0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00};
-uint8_t temp[8]    = {0x04, 0x0A, 0x0A, 0x0A, 0x0A, 0x1F, 0x1F, 0x0E};
+const uint8_t bell[8]    PROGMEM = {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00}; //PROGMEM saves variable to flash & keeps free dynamic memory
+const uint8_t note[8]    PROGMEM = {0x01, 0x03, 0x05, 0x09, 0x0B, 0x1B, 0x18, 0x00};
+const uint8_t clock[8]   PROGMEM = {0x00, 0x0E, 0x15, 0x17, 0x11, 0x0E, 0x00, 0x00};
+const uint8_t heart[8]   PROGMEM = {0x00, 0x0A, 0x1F, 0x1F, 0x0E, 0x04, 0x00, 0x00};
+const uint8_t duck[8]    PROGMEM = {0x00, 0xCC, 0x1D, 0x0F, 0x0F, 0x06, 0x00, 0x00};
+const uint8_t check[8]   PROGMEM = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
+const uint8_t lock[8]    PROGMEM = {0x0E, 0x11, 0x11, 0x1F, 0x1B, 0x1B, 0x1F, 0x00};
+const uint8_t battery[8] PROGMEM = {0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00};
+const uint8_t temp[8]    PROGMEM = {0x04, 0x0A, 0x0A, 0x0A, 0x0A, 0x1F, 0x1F, 0x0E};
 
-uint8_t icon       = 0;
+uint8_t icon = 0;
   
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
@@ -65,7 +69,7 @@ void setup()
 
   while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
   {
-    Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
+    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps free dynamic memory
     delay(5000);   
   }
 
@@ -135,7 +139,7 @@ void loop()
       lcd.write(SUM);
       break;
     case 14:
-      lcd.write(PI);
+      lcd.write(PI_SIGN);
       break;
     case 15:
       lcd.write(DIVISION);
