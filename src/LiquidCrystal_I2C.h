@@ -20,7 +20,7 @@
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
                                             *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
-                                             logic level converter is recomended
+                                             logic level converter is recommended
 
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
