@@ -4,17 +4,19 @@
 
   PCF8574 chip uses I2C bus to communicate, specials pins are required to interface
   Board:                                    SDA                    SCL
-  Uno, Mini, Pro........................... A4                     A5
+  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5
   Mega2560, Due............................ 20                     21
-  Leonardo................................. 2                      3
-  Trinket/ATtiny85......................... 0/physical pin no.5    2/physical pin no.7
-  Blue Pill/STM32F103xxxx boards........... B7                     B6 with 5v->3v logich converter
+  Leonardo, Micro, ATmega32U4.............. 2                      3
+  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
+  Blue Pill, STM32F103xxxx boards.......... B7*                    B6*
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
+                                            *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
+                                             logic level converter is recomended
+
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
-  ATtiny I2C Master lib - https://github.com/SpenceKonde/TinyWireM
   ESP8266 Core          - https://github.com/esp8266/Arduino
   ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
@@ -37,7 +39,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, connect B7/B6 to PCF8574 via 5v->3v logich converter or in series with 10kOhm resistors
+  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, pins B6/B7 are 5v tolerant, but bi-directional logic level converter is recomended
   {
     Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
     delay(5000);
