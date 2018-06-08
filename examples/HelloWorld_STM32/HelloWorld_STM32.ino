@@ -13,7 +13,7 @@
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
                                             *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
-                                             logic level converter is recomended
+                                             logic level converter is recommended
 
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
@@ -39,7 +39,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, pins B6/B7 are 5v tolerant, but bi-directional logic level converter is recomended
+  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, pins B6/B7 are 5v tolerant, but bi-directional logic level converter is recommended
   {
     Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
     delay(5000);
