@@ -196,7 +196,7 @@ class LiquidCrystal_I2C : public Print
    void shiftDecrement(void);
    void autoscroll(void);
    void noAutoscroll(void); 
-   void createChar(uint8_t CGRAM_address, const uint8_t *char_pattern);
+   void createChar(uint8_t CGRAM_address, const uint8_t *char_pattern, char value);
    void noBacklight(void);
    void backlight(void);
 
