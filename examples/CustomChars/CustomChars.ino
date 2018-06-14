@@ -56,8 +56,8 @@ const uint8_t heart[8]   PROGMEM = {0x00, 0x0A, 0x1F, 0x1F, 0x0E, 0x04, 0x00, 0x
 const uint8_t duck[8]    PROGMEM = {0x00, 0xCC, 0x1D, 0x0F, 0x0F, 0x06, 0x00, 0x00};
 const uint8_t check[8]   PROGMEM = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
 const uint8_t lock[8]    PROGMEM = {0x0E, 0x11, 0x11, 0x1F, 0x1B, 0x1B, 0x1F, 0x00};
-const uint8_t battery[8] PROGMEM = {0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00};
-const uint8_t temp[8]    PROGMEM = {0x04, 0x0A, 0x0A, 0x0A, 0x0A, 0x1F, 0x1F, 0x0E};
+      uint8_t battery[8]         = {0x0E, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00}; //saves variable to dynamic memory
+      uint8_t temp[8]            = {0x04, 0x0A, 0x0A, 0x0A, 0x0A, 0x1F, 0x1F, 0x0E};
 
 uint8_t icon = 0;
   
@@ -78,14 +78,14 @@ void setup()
 
   lcd.clear();
   
-  lcd.createChar(0, bell);
-  lcd.createChar(1, note);
-  lcd.createChar(2, watch);
-  lcd.createChar(3, heart);
-  lcd.createChar(4, duck);
-  lcd.createChar(5, check);
-  lcd.createChar(6, lock);
-  lcd.createChar(7, battery);
+  lcd.createChar(0, bell,    'F'); //'F' - variable stored in flash
+  lcd.createChar(1, note,    'F');
+  lcd.createChar(2, watch,   'F');
+  lcd.createChar(3, heart,   'F');
+  lcd.createChar(4, duck,    'F');
+  lcd.createChar(5, check,   'F');
+  lcd.createChar(6, lock,    'M'); //'M' - variable stored in dynamic memory
+  lcd.createChar(7, battery, 'M');
 }
 
 void loop()
