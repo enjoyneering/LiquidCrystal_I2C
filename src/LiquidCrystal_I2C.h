@@ -123,8 +123,8 @@ lcd_font_size;
 
 
 /* lcd misc. */
-#define LCD_HOME_CLEAR_DELAY     2    //duration of home & clear commands, in milliroseconds
-#define LCD_COMMAND_DELAY        42   //duration of command, in microseconds
+#define LCD_HOME_CLEAR_DELAY     2    //duration of home & clear commands, in milliseconds
+#define LCD_COMMAND_DELAY        43   //duration of command, in microseconds
 #define LCD_EN_PULSE_DELAY       1    //duration of the En pulse, in microseconds
 #define LCD_CMD_LENGTH_8BIT      8    //8-bit command length
 #define LCD_CMD_LENGTH_4BIT      4    //4-bit command length
@@ -209,7 +209,6 @@ class LiquidCrystal_I2C : public Print
 
    /* Arduino Unsupported API functions */
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
-   void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
   private:
