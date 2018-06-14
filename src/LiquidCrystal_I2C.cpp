@@ -212,8 +212,8 @@ void LiquidCrystal_I2C::setCursor(uint8_t colum, uint8_t row)
   uint8_t row_address_offset[] = {0x00, 0x40, uint8_t(0x00 + _lcd_colums), uint8_t(0x40 + _lcd_colums)};
 
   /* safety check, cursor position & array are zero indexed */
-  if (row   >= _lcd_rows)   row   = _lcd_rows   - 1;
-  if (colum >= _lcd_colums) colum = _lcd_colums - 1;
+  if (row   >= _lcd_rows)   row   = (_lcd_rows   - 1);
+  if (colum >= _lcd_colums) colum = (_lcd_colums - 1);
 
   send(LCD_INSTRUCTION_WRITE, LCD_DDRAM_ADDR_SET | (row_address_offset[row] + colum), LCD_CMD_LENGTH_8BIT);
 }
@@ -402,37 +402,41 @@ void LiquidCrystal_I2C::noAutoscroll(void)
     Fills the 64 bytes CGRAM, with custom characters
 
     NOTE:
-    - 8 locations for 5x8DOTS  display, at index 0-7
-    - 4 locations for 5x10DOTS display, at index 0-3
+    - 8 patterns for 5x8DOTS display, write address 0..7
+      & read address 0..7/8..15
+    - 4 patterns for 5x10DOTS display, wrire address 0..3
+      & read address 0..3/0..7
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pattern)
 {
   uint8_t CGRAM_capacity = 0;
-  uint8_t font_size      = 0;
+  int8_t  font_size      = 0;
 
   /* set CGRAM capacity */
   switch (_lcd_font_size)
   {
     case LCD_5x8DOTS:
-      CGRAM_capacity = 0x07;
+      CGRAM_capacity = 7;                                                                      //8 patterns, 0..7
       font_size      = 8;
       break;
 
     case LCD_5x10DOTS:
-      CGRAM_capacity = 0x3;
+      CGRAM_capacity = 3;                                                                      //4 patterns, 0..3
       font_size      = 10;
       break;
   }
 
   /* safety check, make sure "CGRAM_address" never exceeds the "CGRAM_capacity" */
-  CGRAM_address &= CGRAM_capacity;
+  if (CGRAM_address > CGRAM_capacity) CGRAM_address = CGRAM_capacity;
 
   send(LCD_INSTRUCTION_WRITE, LCD_CGRAM_ADDR_SET | (CGRAM_address << 3), LCD_CMD_LENGTH_8BIT); //set CGRAM address
 
-  for (uint8_t i = 0; i < font_size; i++)
+  while (font_size > 0)
   {
-    send(LCD_DATA_WRITE, char_pattern[i], LCD_CMD_LENGTH_8BIT);                                //write data to CGRAM address
+    send(LCD_DATA_WRITE, pgm_read_byte(char_pattern), LCD_CMD_LENGTH_8BIT);                    //write data to CGRAM address
+    char_pattern++;                                                                            //move to the next memory cell
+    font_size--;                                                                               //qnt of cells to send
   }
 }
 
@@ -534,36 +538,36 @@ void LiquidCrystal_I2C::initialization(void)
 
   /*
      HD44780/WH160xB & etc need ~40ms after voltage rises above 2.7v
-     some Arduino can start & run the code at 2.4v, so we'll wait 700ms
+     some Arduino can start & execute the code at 2.4v, so we'll wait 700ms
   */
   delay(700);
 
   /*
      FIRST ATTEMPT: set 8-bit mode
-     wait min 4.1ms some LCDs need more than 4.5ms. so we'll wait 7ms
-     NB: used for Hitachi & Winstar
+     - wait > 4.1ms, some LCDs need more than 4.5ms so we'll wait 7ms
+     - for Hitachi & Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
   delay(7);
 
   /*
      SECOND ATTEMPT: set 8-bit mode
-     wait min 100us.
-     NB: used for Hitachi only, not needed for Winstar displays
+     - wait > 100us.
+     - for Hitachi, not needed for Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
-  delayMicroseconds(350);
+  delayMicroseconds(200);
 	
   /*
      THIRD ATTEMPT: set 8 bit mode
-     NB: used for Hitachi only, not needed for Winstar displays
+     - used for Hitachi, not needed for Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
-  delayMicroseconds(250);
+  delayMicroseconds(100);
 	
   /*
      FINAL ATTEMPT: set 4-bit interface
-     NB: Busy Flag can be checked after this instruction
+     - Busy Flag (BF) can be checked after this instruction
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_4BIT_MODE, LCD_CMD_LENGTH_4BIT);
 
@@ -577,17 +581,17 @@ void LiquidCrystal_I2C::initialization(void)
     if(_lcd_rows != 1) displayFunction &= ~LCD_2_LINE; //safety check, two rows displays can't display 10 pixel font
   }
 
-  /* initializes lcd functions: qnt. of lines, font size, etc. (can't be changed after this point) */
+  /* initializes lcd functions: qnt. of lines, font size, etc., this settings can't be changed after this point */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_4BIT_MODE | displayFunction, LCD_CMD_LENGTH_8BIT);
 	
-  /* initializes lcd controls: turn display off, underline cursor off & blinking cursor off (by default) */
+  /* initializes lcd controls: turn display off, underline cursor off & blinking cursor off */
   _displayControl = LCD_UNDERLINE_CURSOR_OFF | LCD_BLINK_CURSOR_OFF;
   noDisplay();
 
   /* clear display */
   clear();
 
-  /* initializes lcd basics: sets text direction "left to right" & cursor movement to the right (by default) */
+  /* initializes lcd basics: sets text direction "left to right" & cursor movement to the right */
   _displayMode = LCD_ENTRY_LEFT | LCD_ENTRY_SHIFT_OFF;
   send(LCD_INSTRUCTION_WRITE, LCD_ENTRY_MODE_SET | _displayMode, LCD_CMD_LENGTH_8BIT);
 
@@ -604,7 +608,7 @@ void LiquidCrystal_I2C::initialization(void)
     - all inputs formated as follow: 
       mode  - RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
       value - DB7,DB6,DB5,DB4,DB3,DB2,DB1,DB0
-    - duration of command > 37usec
+    - duration of command > 43usec for GDM2004D
     - duration of the En pulse > 450nsec
 */
 /**************************************************************************/
@@ -811,8 +815,8 @@ uint8_t LiquidCrystal_I2C::readAddressCounter()
 /**************************************************************************/
 void LiquidCrystal_I2C::printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue)
 {
-    uint16_t currentGraph = 0;
-    uint8_t  colum        = 0;
+    uint8_t currentGraph = 0;
+    uint8_t colum        = 0;
 
     if (currentValue > maxValue) currentValue = maxValue;          //safety check, without it ESP8266 reboots
 
@@ -825,76 +829,14 @@ void LiquidCrystal_I2C::printHorizontalGraph(char name, uint8_t row, uint16_t cu
     for (colum = 1; colum < currentGraph; colum++)
     {
       setCursor(colum, row);
-      send(LCD_DATA_WRITE, 0xFF, LCD_CMD_LENGTH_8BIT);             //print 0xFF - built in "solid square" char. see p.17 & p.30 of HD44780 datasheet
+      send(LCD_DATA_WRITE, 0xFF, LCD_CMD_LENGTH_8BIT);             //print 0xFF - built in "solid square" symbol, see p.17 & p.30 of HD44780 datasheet
     }
 
     /* fill the left overs (from the previous draw) with spaces */
     for (colum; colum < _lcd_colums; colum++)
     {
-      send(LCD_DATA_WRITE, 0x20, LCD_CMD_LENGTH_8BIT);             //print 0x20 - built in "space" char. see p.17 & p.30 of HD44780 datasheet
+      send(LCD_DATA_WRITE, 0x20, LCD_CMD_LENGTH_8BIT);             //print 0x20 - built in "space" symbol, see p.17 & p.30 of HD44780 datasheet
     }
-}
-
-/**************************************************************************/
-/*
-    printVerticalGraph()
-
-    Prints vertical graph
-*/
-/**************************************************************************/
-void LiquidCrystal_I2C::printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue)
-{
-  uint16_t currentGraph = 0;
-
-  uint8_t verticalBar_0[8] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-  uint8_t verticalBar_1[8] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x1F};
-  uint8_t verticalBar_2[8] = {0x00,0x00,0x00,0x00,0x00,0x00,0x1F,0x1F};
-  uint8_t verticalBar_3[8] = {0x00,0x00,0x00,0x00,0x00,0x1F,0x1F,0x1F};
-  uint8_t verticalBar_4[8] = {0x00,0x00,0x00,0x00,0x1F,0x1F,0x1F,0x1F};
-  uint8_t verticalBar_5[8] = {0x00,0x00,0x00,0x1F,0x1F,0x1F,0x1F,0x1F};
-  uint8_t verticalBar_6[8] = {0x00,0x00,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F};
-  uint8_t verticalBar_7[8] = {0x00,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F};
-  uint8_t verticalBar_8[8] = {0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F};
-
-  if (currentValue > maxValue) currentValue = maxValue; //safety check, without it ESP8266 reboots
-
-  currentGraph = map(currentValue, 0, maxValue, 0, 8);
-
-  switch(currentGraph)
-  {
-    case 0:
-      createChar(0x07, verticalBar_0);
-      break;
-    case 1:
-      createChar(0x07, verticalBar_1);
-      break;
-    case 2:
-      createChar(0x07, verticalBar_2);
-      break;
-    case 3:
-      createChar(0x07, verticalBar_3);
-      break;
-    case 4:
-      createChar(0x07, verticalBar_4);
-      break;
-    case 5:
-      createChar(0x07, verticalBar_5);
-      break;
-    case 6:
-      createChar(0x07, verticalBar_6);
-      break;
-    case 7:
-      createChar(0x07, verticalBar_7);
-      break;
-    case 8:
-      createChar(0x07, verticalBar_8);
-      break;
-    default:
-      break;
-  }
-
-  setCursor(colum, row);
-  send(LCD_DATA_WRITE, 0x07, LCD_CMD_LENGTH_8BIT);      //print custom char from 7th CGRAM address
 }
 
 /**************************************************************************/
