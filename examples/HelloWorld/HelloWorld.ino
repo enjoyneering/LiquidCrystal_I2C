@@ -41,21 +41,21 @@ void setup()
 
   while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
   {
-    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps free dynamic memory
+    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps dynamic memory free
     delay(5000);   
   }
 
-  lcd.print("PCF8574 is OK...");
+  lcd.print(F("PCF8574 is OK..."));
   delay(2000);
 
   lcd.clear();
 
   /* prints static text */
   lcd.setCursor(0, 1);                 //set 1-st colum & 2-nd row, 1-st colum & row started at zero
-  lcd.print("Hello world!");
+  lcd.print(F("Hello world!"));
 
   lcd.setCursor(0, 2);
-  lcd.print("Random number:");
+  lcd.print(F("Random number:"));
 }
 
 
