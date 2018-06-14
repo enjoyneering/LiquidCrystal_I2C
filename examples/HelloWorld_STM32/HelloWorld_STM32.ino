@@ -41,25 +41,25 @@ void setup()
 
   while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, pins B6/B7 are 5v tolerant, but bi-directional logic level converter is recommended
   {
-    Serial.println("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.");
+    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps dynamic memory free
     delay(5000);
   }
 
-  lcd.print("PCF8574 is OK...");
+  lcd.print(F("PCF8574 is OK..."));
   delay(2000);
 
   lcd.clear();
 
   /* prints static text */
-  lcd.print("Hello world!");
-  lcd.setCursor(0, 1);         //set 1-st colum & 2-nd row. NOTE: 1-st colum & row started at zero
-  lcd.print("Random number:");
+  lcd.print(F("Hello world!"));
+  lcd.setCursor(0, 1);            //set 1-st colum & 2-nd row. NOTE: 1-st colum & row started at zero
+  lcd.print(F("Random number:"));
 }
 
 void loop()
 {
   /* prints dynamic text */
-  lcd.setCursor(14, 1);        //set 15-th colum & 2-nd row. NOTE: 1-st colum & row started at zero
+  lcd.setCursor(14, 1);           //set 15-th colum & 2-nd row. NOTE: 1-st colum & row started at zero
   lcd.print(random(10, 1000));
   lcd.write(LCD_SPACE_SYMBOL);
 
