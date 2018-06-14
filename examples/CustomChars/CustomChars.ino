@@ -49,9 +49,9 @@
 #define COLUMS      20
 #define ROWS        4
 
-const uint8_t bell[8]    PROGMEM = {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00}; //PROGMEM saves variable to flash & keeps free dynamic memory
+const uint8_t bell[8]    PROGMEM = {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00}; //PROGMEM saves variable to flash & keeps dynamic memory free
 const uint8_t note[8]    PROGMEM = {0x01, 0x03, 0x05, 0x09, 0x0B, 0x1B, 0x18, 0x00};
-const uint8_t clock[8]   PROGMEM = {0x00, 0x0E, 0x15, 0x17, 0x11, 0x0E, 0x00, 0x00};
+const uint8_t watch[8]   PROGMEM = {0x00, 0x0E, 0x15, 0x17, 0x11, 0x0E, 0x00, 0x00};
 const uint8_t heart[8]   PROGMEM = {0x00, 0x0A, 0x1F, 0x1F, 0x0E, 0x04, 0x00, 0x00};
 const uint8_t duck[8]    PROGMEM = {0x00, 0xCC, 0x1D, 0x0F, 0x0F, 0x06, 0x00, 0x00};
 const uint8_t check[8]   PROGMEM = {0x00, 0x01, 0x03, 0x16, 0x1C, 0x08, 0x00, 0x00};
@@ -69,18 +69,18 @@ void setup()
 
   while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
   {
-    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps free dynamic memory
+    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps dynamic memory free
     delay(5000);   
   }
 
-  lcd.print("PCF8574 is OK...");
+  lcd.print(F("PCF8574 is OK..."));
   delay(2000);
 
   lcd.clear();
   
   lcd.createChar(0, bell);
   lcd.createChar(1, note);
-  lcd.createChar(2, clock);
+  lcd.createChar(2, watch);
   lcd.createChar(3, heart);
   lcd.createChar(4, duck);
   lcd.createChar(5, check);
