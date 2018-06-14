@@ -32,7 +32,6 @@ createChar		KEYWORD2
 print			KEYWORD2
 
 printHorizontalGraph	KEYWORD2
-printVerticalGraph	KEYWORD2
 setBrightness		KEYWORD2
 
 #######################################
