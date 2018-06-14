@@ -408,7 +408,7 @@ void LiquidCrystal_I2C::noAutoscroll(void)
       & read address 0..3/0..7
 */
 /**************************************************************************/
-void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pattern)
+void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pattern, char value)
 {
   uint8_t CGRAM_capacity = 0;
   int8_t  font_size      = 0;
@@ -432,11 +432,24 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pa
 
   send(LCD_INSTRUCTION_WRITE, LCD_CGRAM_ADDR_SET | (CGRAM_address << 3), LCD_CMD_LENGTH_8BIT); //set CGRAM address
 
-  while (font_size > 0)
+
+  switch (value)
   {
-    send(LCD_DATA_WRITE, pgm_read_byte(char_pattern), LCD_CMD_LENGTH_8BIT);                    //write data to CGRAM address
-    char_pattern++;                                                                            //move to the next memory cell
-    font_size--;                                                                               //qnt of cells to send
+    case 'F':                                                                                  //'F' - variable stored in flash
+      while (font_size > 0)
+      {
+        send(LCD_DATA_WRITE, pgm_read_byte(char_pattern), LCD_CMD_LENGTH_8BIT);                //write data to CGRAM address
+        char_pattern++;                                                                        //move to the next memory cell
+        font_size--;                                                                           //qnt of cells to send
+      }
+      break;
+
+    case 'M':                                                                                  //'M' - variable stored in dynamic memory
+      for (uint8_t i = 0; i < font_size; i++)
+      {
+        send(LCD_DATA_WRITE, char_pattern[i], LCD_CMD_LENGTH_8BIT);                            //write data to CGRAM address
+      }    
+      break;
   }
 }
 
