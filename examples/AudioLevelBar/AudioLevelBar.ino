@@ -43,11 +43,11 @@ void setup()
 
   while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
   {
-    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps free dynamic memory
+    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal.")); //(F()) saves string to flash & keeps dynamic memory free
     delay(5000);   
   }
 
-  lcd.print("PCF8574 is OK...");
+  lcd.print(F("PCF8574 is OK..."));
   delay(2000);
 
   lcd.clear();
