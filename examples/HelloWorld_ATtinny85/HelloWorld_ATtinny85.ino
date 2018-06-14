@@ -55,9 +55,9 @@ void setup()
   }
 
   /* prints static text */
-  lcd.print("Hello world!");
-  lcd.setCursor(0, 1);                 //set 1-st colum & 2-nd row. NOTE: 1-st colum & row started at zero
-  lcd.print("Random number:");
+  lcd.print(F("Hello world!"));        //(F()) saves string to flash & keeps dynamic memory free
+  lcd.setCursor(0, 1);                 //set 1-st colum & 2-nd row, 1-st colum & row started at zero
+  lcd.print(F("Random number:"));
 }
 
 void loop()
