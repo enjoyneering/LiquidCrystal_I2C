@@ -54,6 +54,7 @@
 #include <inttypes.h>
 #include <Print.h>
 
+
 /* 
    lcd main register commands
    NOTE: all commands formated as RS=(0:IR write & BF read, 1:DR write/read), RW=(0:write, 1:read), E=1, DB7=0, DB6=0, DB5=0, DB4=0, BCK_LED=0
@@ -196,7 +197,8 @@ class LiquidCrystal_I2C : public Print
    void shiftDecrement(void);
    void autoscroll(void);
    void noAutoscroll(void); 
-   void createChar(uint8_t CGRAM_address, const uint8_t *char_pattern, char value);
+   void createChar(uint8_t CGRAM_address, uint8_t *char_pattern);
+   void createChar(uint8_t CGRAM_address, const uint8_t *char_pattern);
    void noBacklight(void);
    void backlight(void);
 
@@ -207,8 +209,15 @@ class LiquidCrystal_I2C : public Print
    virtual void write(uint8_t value);
    #endif
 
+   /*
+   size_t writeln(uint8_t);
+   */
+
    /* Arduino Unsupported API functions */
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
+   //void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
+   //void printVerticalDoubleGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
+   //void printVerticalQuadGraph(uint8_t colum, uint16_t currentValue, uint16_t maxValue);
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
   private:
