@@ -78,14 +78,14 @@ void setup()
 
   lcd.clear();
   
-  lcd.createChar(0, bell,    'F'); //'F' - variable stored in flash
-  lcd.createChar(1, note,    'F');
-  lcd.createChar(2, watch,   'F');
-  lcd.createChar(3, heart,   'F');
-  lcd.createChar(4, duck,    'F');
-  lcd.createChar(5, check,   'F');
-  lcd.createChar(6, lock,    'M'); //'M' - variable stored in dynamic memory
-  lcd.createChar(7, battery, 'M');
+  lcd.createChar(0, bell);    //variable stored in flash
+  lcd.createChar(1, note);    //variable stored in flash
+  lcd.createChar(2, watch);   //variable stored in flash
+  lcd.createChar(3, heart);   //variable stored in flash
+  lcd.createChar(4, duck);    //variable stored in flash
+  lcd.createChar(5, check);   //variable stored in flash
+  lcd.createChar(6, lock);    //variable stored in dynamic memory
+  lcd.createChar(7, battery); //variable stored in dynamic memory
 }
 
 void loop()
