@@ -44,14 +44,13 @@ void setup()
 
   while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
   {
-    for (uint8_t i = 0; i < 3; i++)    //3 blinks, PCF8574/LCD is not connected or lcd pins declaration is wrong
+    for (uint8_t i = 0; i < 5; i++)    //3 blinks, PCF8574/LCD is not connected or lcd pins declaration is wrong
     {
       digitalWrite(LED, HIGH);
       delay(500);
       digitalWrite(LED, LOW);
       delay(500);
     }
-    delay(5000);
   }
 
   /* prints static text */
@@ -63,7 +62,7 @@ void setup()
 void loop()
 {
   /* prints dynamic text */
-  lcd.setCursor(14, 1);                //set 15-th colum & 2-nd row. NOTE: 1-st colum & row started at zero
+  lcd.setCursor(14, 1);                //set 15-th colum & 2-nd row, 1-st colum & row started at zero
   lcd.print(random(10, 1000));
   lcd.write(LCD_SPACE_SYMBOL);
 
