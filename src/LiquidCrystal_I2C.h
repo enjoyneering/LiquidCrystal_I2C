@@ -215,9 +215,6 @@ class LiquidCrystal_I2C : public Print
 
    /* Arduino Unsupported API functions */
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
-   //void printVerticalGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
-   //void printVerticalDoubleGraph(uint8_t colum, uint8_t row, uint16_t currentValue, uint16_t maxValue);
-   //void printVerticalQuadGraph(uint8_t colum, uint16_t currentValue, uint16_t maxValue);
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
   private:
