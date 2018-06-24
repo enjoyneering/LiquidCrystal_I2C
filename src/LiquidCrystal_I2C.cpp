@@ -15,12 +15,12 @@
   Mega2560, Due............................ 20                     21
   Leonardo, Micro, ATmega32U4.............. 2                      3
   Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
-  Blue Pill, STM32F103xxxx boards.......... B7*                    B6*
+  Blue Pill, STM32F103xxxx boards.......... PB7*                   PB6*
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
-                                            *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
-                                             logic level converter is recommended
+                                           *STM32F103xxxx pins B7/B7 are 5v tolerant, but
+                                            bi-directional logic level converter is recommended
 
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
@@ -59,36 +59,36 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P
   {
     switch(PCF8574_TO_LCD[i])
     {
-      case 4:         //RS pin
-        _LCD_TO_PCF8574[0] = i;
+      case 4:                   //RS pin
+        _LCD_TO_PCF8574[7] = i;
         break;
 
-      case 5:         //RW pin
-        _LCD_TO_PCF8574[1] = i;
-        break;
-
-      case 6:         //EN pin
-        _LCD_TO_PCF8574[2] = i;
-        break;
-
-      case 14:        //D7 pin
-        _LCD_TO_PCF8574[3] = i;
-        break;
-
-      case 13:        //D6 pin
-        _LCD_TO_PCF8574[4] = i;
-        break;
-
-      case 12:        //D5 pin
-        _LCD_TO_PCF8574[5] = i;
-        break;
-
-      case 11:        //D4 pin
+      case 5:                   //RW pin
         _LCD_TO_PCF8574[6] = i;
         break;
 
-      case 16:        //BL pin
-        _LCD_TO_PCF8574[7] = i;
+      case 6:                   //EN pin
+        _LCD_TO_PCF8574[5] = i;
+        break;
+
+      case 14:                  //D7 pin
+        _LCD_TO_PCF8574[4] = i;
+        break;
+
+      case 13:                  //D6 pin
+        _LCD_TO_PCF8574[3] = i;
+        break;
+
+      case 12:                  //D5 pin
+        _LCD_TO_PCF8574[2] = i;
+        break;
+
+      case 11:                  //D4 pin
+        _LCD_TO_PCF8574[1] = i;
+        break;
+
+      case 16:                  //BL pin
+        _LCD_TO_PCF8574[0] = i;
         break;
 
       default:
@@ -109,7 +109,7 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P
       break;
   }
 
-  _backlightValue <<= _LCD_TO_PCF8574[7];
+  _backlightValue <<= _LCD_TO_PCF8574[0];
 }
 
 /**************************************************************************/
@@ -225,7 +225,7 @@ void LiquidCrystal_I2C::setCursor(uint8_t colum, uint8_t row)
     Clears text from the screen
 
     NOTE:
-    - data/text remains in DDRAM
+    - text remains in DDRAM
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::noDisplay(void)
@@ -242,7 +242,7 @@ void LiquidCrystal_I2C::noDisplay(void)
     Retrives text from DDRAM
 
     NOTE:
-    - text & data remains in DDRAM !!!
+    - text remains in DDRAM
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::display(void)
@@ -312,7 +312,7 @@ void LiquidCrystal_I2C::blink(void)
 /*
     scrollDisplayLeft()
 
-    Scrolls the current row with text on the display to the left.
+    Scrolls current row with text on the display to the left.
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::scrollDisplayLeft(void)
@@ -324,7 +324,7 @@ void LiquidCrystal_I2C::scrollDisplayLeft(void)
 /*
     scrollDisplayRight()
 
-    Scrolls the current row with text on the display to the right.
+    Scrolls current row with text on the display to the right.
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::scrollDisplayRight(void)
@@ -399,7 +399,7 @@ void LiquidCrystal_I2C::noAutoscroll(void)
 /*
     createChar()
 
-    Fills the 64 bytes CGRAM, with custom characters from dynamic memory
+    Fills 64-bytes CGRAM, with custom characters from dynamic memory
 
     NOTE:
     - 8 patterns for 5x8DOTS display, write address 0..7
@@ -435,14 +435,14 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, uint8_t *char_pattern)
   for (uint8_t i = 0; i < font_size; i++)
   {
     send(LCD_DATA_WRITE, char_pattern[i], LCD_CMD_LENGTH_8BIT);                                //write data from dynamic memory to CGRAM address
-  }    
+  }
 }
 
 /**************************************************************************/
 /*
     createChar()
 
-    Fills the 64 bytes CGRAM, with custom characters from flash memory
+    Fills 64-bytes CGRAM, with custom characters from flash memory
 
     NOTE:
     - 8 patterns for 5x8DOTS display, write address 0..7
@@ -451,6 +451,7 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, uint8_t *char_pattern)
       & read address 0..3/0..7
 */
 /**************************************************************************/
+#if defined (PROGMEM)
 void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pattern)
 {
   uint8_t CGRAM_capacity = 0;
@@ -481,12 +482,13 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pa
     font_size--;                                                                               //qnt of cells to send
   }
 }
+#endif
 
 /**************************************************************************/
 /*
     noBacklight()
 
-    Turns OFF the backlight with PCF8574. 
+    Turns off the backlight via PCF8574. 
 
     NOTE:
     - doesn't affect lcd controller, because we are working with
@@ -506,7 +508,7 @@ void LiquidCrystal_I2C::noBacklight(void)
       break;
   }
 
-  _backlightValue <<= _LCD_TO_PCF8574[7];
+  _backlightValue <<= _LCD_TO_PCF8574[0];
 
   writePCF8574(PCF8574_ALL_LOW);
 }
@@ -515,7 +517,7 @@ void LiquidCrystal_I2C::noBacklight(void)
 /*
     backlight()
 
-    Turns ON the backlight with PCF8574.
+    Turns on backlight via PCF8574.
 
     NOTE:
     - doesn't affect lcd controller, because we are working with
@@ -535,7 +537,7 @@ void LiquidCrystal_I2C::backlight(void)
       break;
   }
 
-  _backlightValue <<= _LCD_TO_PCF8574[7];
+  _backlightValue <<= _LCD_TO_PCF8574[0];
 
   writePCF8574(PCF8574_ALL_LOW);
 }
@@ -648,41 +650,38 @@ void LiquidCrystal_I2C::initialization(void)
     
     NOTE:
     - all inputs formated as follow: 
-      mode  - RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
-      value - DB7,DB6,DB5,DB4,DB3,DB2,DB1,DB0
+      - mode : RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+      - value: DB7,DB6,DB5,DB4,DB3,DB2,DB1,DB0
+
     - duration of command > 43usec for GDM2004D
     - duration of the En pulse > 450nsec
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
 {
-  uint8_t data = 0;
-  uint8_t msb  = 0;
-  uint8_t lsb  = 0;
+  /* 4-bit or 1-st part of 8-bit command */
+  uint8_t lsb  = value >> 3;               //0,0,0,DB7,DB6,DB5,DB4,DB3
+          lsb &= 0x1E;                     //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0
+  uint8_t data = portMapping(mode | lsb);  //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
 
-  /* 4-bit or first part of 8-bit command */
-  lsb  = value >> 3;                       //0,0,0,DB7,DB6,DB5,DB4,DB3
-  lsb &= 0x1E;                             //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0 
-  data = portMapping(mode | lsb);          //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
-
-  writePCF8574(data);                      //send command
-  delayMicroseconds(LCD_EN_PULSE_DELAY);   //En pulse duration
-  bitClear(data, _LCD_TO_PCF8574[2]);      //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
-  writePCF8574(data);                      //execute command
-  delayMicroseconds(LCD_COMMAND_DELAY);    //command duration
+  writePCF8574(data);                       //send command
+  //En pulse duration > 450nsec             //delayMicroseconds(LCD_EN_PULSE_DELAY);
+  bitClear(data, _LCD_TO_PCF8574[5]);       //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
+  writePCF8574(data);                       //execute command
+  delayMicroseconds(LCD_COMMAND_DELAY);     //command duration
 
   /* second part of 8-bit command */
   if (length == LCD_CMD_LENGTH_8BIT)
   {
-    msb  = value << 1;                     //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
-    msb &= 0x1E;                           //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0 
-    data = portMapping(mode | msb);        //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
+    uint8_t msb  = value << 1;              //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
+            msb &= 0x1E;                    //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0
+            data = portMapping(mode | msb); //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
 
-    writePCF8574(data);                    //send command
-    delayMicroseconds(LCD_EN_PULSE_DELAY); //En pulse duration
-    bitClear(data, _LCD_TO_PCF8574[2]);    //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
-    writePCF8574(data);                    //execute command
-    delayMicroseconds(LCD_COMMAND_DELAY);  //command duration
+    writePCF8574(data);                     //send command
+    //En pulse duration > 450nsec           //delayMicroseconds(LCD_EN_PULSE_DELAY);
+    bitClear(data, _LCD_TO_PCF8574[5]);     //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
+    writePCF8574(data);                     //execute command
+    delayMicroseconds(LCD_COMMAND_DELAY);   //command duration
   }	
 }
 
@@ -693,18 +692,27 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
     All magic of pins to ports mapping is happening here!!!
 
     NOTE:
-    - isolates HD44780 bits & shifts to the right PCF8574 ports position
-      RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED -> P0,P1,P2,P3,P4,P5,P6,P7
-      RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED -> P0,P1,P2,P3,P4,P5,P6,P7  
+    - input value formated as:
+        7  6  5  4  3   2   1   0-bit
+      - RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
+      - RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED
+
+    - lcd pin to PCF8574 ports table/array formated
+        0       1   2  3   4   5  6  7
+      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} 
+
+    - shifts value bits to the right PCF8574 ports position P7..P0
+      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} -shift-> RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
+      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} -shift-> RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED
 */
 /**************************************************************************/
-uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
+inline uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
 {
   uint8_t data = 0;
 
-  for (uint8_t i = 0; i < 8; i++)
+  for (int8_t i = 7; i >= 0; i--)
   {
-    bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, (7 - i)));
+    bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, i));
   }
   return data; 
 }
@@ -726,12 +734,8 @@ uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
 /**************************************************************************/
 void LiquidCrystal_I2C::writePCF8574(uint8_t value)
 {
-  int8_t pollCounter = LCD_I2C_POLLING_LIMIT;
-
   do
   {
-    pollCounter--;
-
     Wire.beginTransmission(_PCF8574_address);
     #if ARDUINO >= 100
     Wire.write(value | _backlightValue);
@@ -739,11 +743,7 @@ void LiquidCrystal_I2C::writePCF8574(uint8_t value)
     Wire.send(value | _backlightValue);
     #endif
   }
-  #if defined(_VARIANT_ARDUINO_STM32_)
-  while ((Wire.endTransmission() != 0) || (pollCounter > 0));
-  #else
-  while ((Wire.endTransmission(true) != 0) || (pollCounter > 0));
-  #endif
+  while (Wire.endTransmission(true) != 0);
 }
 
 /**************************************************************************/
@@ -752,29 +752,24 @@ void LiquidCrystal_I2C::writePCF8574(uint8_t value)
 
     Reads byte* from PCF8574 over I2C
 
-    * - the logic values on the PCF8574 pins P0...P7
+    *logic values on the PCF8574 pins P0...P7
 
     NOTE:
-    - if the PCF8574 output is written low before a read, a low is always
-      read from the I/O, regardless of the state of the device connected
-      to the I/O.
-      Therefore, if the PCF8574 outputs are all high (either from power-up
-      reset initialization or from a write) before reading is performed,
-      any devices connected to the I/O can fully control the I/O.
+    - if PCF8574 output is written low before read, the low is always
+      returned, regardless of the device state connected
+      to the I/O, see Quasi-Bidirectional I/O for more details.
+    - if PCF8574 output is written high before read, devices has fully
+      control of PCF8574 I/O.
 */
 /**************************************************************************/
 uint8_t LiquidCrystal_I2C::readPCF8574()
 {
-  int8_t pollCounter = LCD_I2C_POLLING_LIMIT;
-
   do
   {
-    if (pollCounter-- == 0) return 0;            //fail to read
-
     #if defined(_VARIANT_ARDUINO_STM32_)
     Wire.requestFrom(_PCF8574_address, 1);
     #else
-    Wire.requestFrom(_PCF8574_address, 1, true); //true = stop message after transmission & releas the I2C bus
+    Wire.requestFrom(_PCF8574_address, 1, true); //true, stop message after transmission & releas the I2C bus
     #endif  
   }
   while (Wire.available() != 1);                 //check "wire.h" rxBuffer
@@ -791,63 +786,71 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
 /*
     readBusyFlag()
 
-    Checks the LCD's Busy Flag (BF)
+    Reads busy flag (BF)
 
     NOTE:
-    - to retrive Busy Flag set RS=0 & RW=1
-    - if DB7=1 than lcd is busy
-      if DB7=0 than lcd is readyf or a new command
-    - bits DB6, DB5, DB4, DB3, DB2, DB1, DB0 content of
-      address counter/cursor position
+    - set RS=0 & RW=1 to retrive busy flag
+    - set PCF8574 input pins to HIGH, see Quasi-Bidirectional I/O
+    - DB7 = 1, lcd busy
+      DB7 = 0, lcd ready
+    - input value formated as:
+        7  6  5  4  3   2   1   0-bit
+      - RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
+      - RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED
 */
 /**************************************************************************/
 bool LiquidCrystal_I2C::readBusyFlag()
 {
-  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT);
+  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT); //set RS=0, RW=1 & input pins to HIGH, see Quasi-Bidirectional I/O
 
-  return bitRead(readPCF8574(), _LCD_TO_PCF8574[3]);
+  return bitRead(readPCF8574(), _LCD_TO_PCF8574[4]);
 }
 
 /**************************************************************************/
 /*
-    readAddressCounter()
+    getCursorPosition()
 
-    Returns the contents of address counter (cursor position)
+    Returns contents of address counter
 
     NOTE:
-    - to retrive Busy Flag set RS=0 & RW=1
-    - if DB7=1 than lcd is busy
-      if DB7=0 than lcd is readyf or a new command
-    - bits DB6, DB5, DB4, DB3, DB2, DB1, DB0 content of
-      address counter/cursor position
+    - set RS=0 & RW=1 to retrive address counter
+    - set PCF8574 input pins to HIGH, see Quasi-Bidirectional I/O
+    - address counter content DB6,DB5,DB4,DB3,DB2,DB1,DB0 
+    - input value formated as:
+        7  6  5  4  3   2   1   0-bit
+      - RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
+      - RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED
 */
 /**************************************************************************/
-uint8_t LiquidCrystal_I2C::readAddressCounter()
+uint8_t LiquidCrystal_I2C::getCursorPosition()
 {
-  uint8_t data  = 0;
-  uint8_t value = 0;
+  uint8_t data     = 0;
+  uint8_t position = 0;
 
-  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT);
-  data = readPCF8574();
+  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT); //set RS=0, RW=1 & input pins to HIGH, see Quasi-Bidirectional I/O
 
-  for (uint8_t i = 4; i < 7; i++)  //D6, D5, D4
+  data = readPCF8574();                                             //read RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
+
+  /* saving DB6,DB5,DB4 bits*/
+  for (int8_t i = 3; i >= 1; i--)
   {
-    bitWrite(value, 10 - i, bitRead(data, _LCD_TO_PCF8574[i]));
+    bitWrite(position, (3 + i), bitRead(data, _LCD_TO_PCF8574[i])); //xx,DB6,DB5,DB4,DB3,DB2,DB1,DB0
   }
 
-  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT);
-  data = readPCF8574();
+  send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT); //set RS=0, RW=1 & input pins to HIGH, see Quasi-Bidirectional I/O
 
-  for (uint8_t i = 3; i < 7; i++) //D3, D2, D1, D0
+  data = readPCF8574();                                             //read RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED
+
+  /* saving DB3,DB2,DB1,DB0 bits */
+  for (int8_t i = 4; i >= 1; i--)
   {
-    bitWrite(value, 6 - i, bitRead(data, _LCD_TO_PCF8574[i]));
+    bitWrite(position, (i - 1), bitRead(data, _LCD_TO_PCF8574[i])); //xx,DB6,DB5,DB4,DB3,DB2,DB1,DB0
   }
 
-  return value;
+  return position;
 }
 
-/* !!! Arduino Unsupported API functions !!! */
-
+/*************** !!! arduino not standard API functions !!! ***************/
 /**************************************************************************/
 /*
     printHorizontalGraph(name, row, value, maxValue)
@@ -879,6 +882,35 @@ void LiquidCrystal_I2C::printHorizontalGraph(char name, uint8_t row, uint16_t cu
     {
       send(LCD_DATA_WRITE, 0x20, LCD_CMD_LENGTH_8BIT);             //print 0x20 - built in "space" symbol, see p.17 & p.30 of HD44780 datasheet
     }
+}
+
+/**************************************************************************/
+/*
+    displayOff()
+
+    Turns off backlight via PCF8574 & clears text from the screen
+
+    NOTE:
+    - text remains in DDRAM
+*/
+/**************************************************************************/
+void LiquidCrystal_I2C::displayOff(void)
+{
+  noBacklight();
+  noDisplay();
+}
+
+/**************************************************************************/
+/*
+    displayOn()
+
+    Turns on backlight via PCF8574 & retrives text from DDRAM
+*/
+/**************************************************************************/
+void LiquidCrystal_I2C::displayOn(void)
+{
+  display();
+  backlight();
 }
 
 /**************************************************************************/
