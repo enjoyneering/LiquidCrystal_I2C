@@ -3,29 +3,30 @@
   This is an Arduino library for HD44780, S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780,
   WH160xB, AIP31066, GDM200xD, ADM0802A LCD displays.
 
-  Screens are operated in 4 bit mode over I2C bus with 8-bit I/O expander PCF8574x.
+  Screens are operated in 4 bit mode over i2c bus with 8-bit I/O expander PCF8574x.
   Typical displays sizes: 8x2, 16x1, 16x2, 16x4, 20x2, 20x4 & etc.
 
   written by : enjoyneering79
   sourse code: https://github.com/enjoyneering/
 
-  This chip uses I2C bus to communicate, specials pins are required to interface
+  This chip uses i2c bus to communicate, specials pins are required to interface
   Board:                                    SDA                    SCL
   Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5
   Mega2560, Due............................ 20                     21
   Leonardo, Micro, ATmega32U4.............. 2                      3
   Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
-  Blue Pill, STM32F103xxxx boards.......... B7*                    B6*
+  Blue Pill, STM32F103xxxx boards.......... PB7*                   PB6*
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
-                                            *STM32F103xxxx pins B7/B7 are 5v tolerant, but bi-directional
-                                             logic level converter is recommended
+                                           *STM32F103xxxx pins B7/B7 are 5v tolerant,
+                                            but bi-directional logic level converter
+                                            is recommended
 
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
   ESP8266 Core          - https://github.com/esp8266/Arduino
-  ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
+  ESP8266 i2c lib fixed - https://github.com/enjoyneering/ESP8266-i2c-Driver
   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
 
   GNU GPL license, all text above must be included in any redistribution, see link below for details:
@@ -33,8 +34,8 @@
 */
 /***************************************************************************************************/
 
-#ifndef LiquidCrystal_I2C_h
-#define LiquidCrystal_I2C_h
+#ifndef LiquidCrystal_i2c_h
+#define LiquidCrystal_i2c_h
 
 #if defined(ARDUINO) && ARDUINO >= 100 //arduino core v1.0 or later
 #include <Arduino.h>
@@ -124,47 +125,46 @@ lcd_font_size;
 
 
 /* lcd misc. */
+//#define LCD_EN_PULSE_DELAY     1    //duration of the En pulse, in microseconds
 #define LCD_HOME_CLEAR_DELAY     2    //duration of home & clear commands, in milliseconds
 #define LCD_COMMAND_DELAY        43   //duration of command, in microseconds
-#define LCD_EN_PULSE_DELAY       1    //duration of the En pulse, in microseconds
 #define LCD_CMD_LENGTH_8BIT      8    //8-bit command length
 #define LCD_CMD_LENGTH_4BIT      4    //4-bit command length
-#define LCD_I2C_POLLING_LIMIT    8    //i2c retry limit
 
 /* PCF8574 controls */
 #define LCD_BACKLIGHT_ON         0x01
 #define LCD_BACKLIGHT_OFF        0x00
-#define PCF8574_ALL_LOW          0x00 //sets all PCF8574 pins to LOW
-#define PCF8574_DATA_HIGH        0x3E //sets lcd pins E, DB7, DB6, DB5, DB4 to HIGH
+#define PCF8574_ALL_LOW          0x00 //sets PCF8574 pins to RS=0,RW=0,E=0,DB7=0,DB6=0,DB5=0,DB4=0,BCK_LED=0
+#define PCF8574_DATA_HIGH        0x3E //sets PCF8574 pins to RS=0,RW=0,E=1,DB7=1,DB6=1,DB5=1,DB4=1,BCK_LED=0
 
 /* PCF8574 addresses */
 typedef enum
 {
-  PCF8574_ADDR_A21_A11_A01 = 0x27,    //I2C address A2 = 1, A1 = 1, A0 = 1 (by default)
-  PCF8574_ADDR_A21_A11_A00 = 0x26,    //I2C address A2 = 1, A1 = 1, A0 = 0
-  PCF8574_ADDR_A21_A10_A01 = 0x25,    //I2C address A2 = 1, A1 = 0, A0 = 1
-  PCF8574_ADDR_A21_A10_A00 = 0x24,    //I2C address A2 = 1, A1 = 0, A0 = 0
-  PCF8574_ADDR_A20_A11_A01 = 0x23,    //I2C address A2 = 0, A1 = 1, A0 = 1
-  PCF8574_ADDR_A20_A11_A00 = 0x22,    //I2C address A2 = 0, A1 = 1, A0 = 0
-  PCF8574_ADDR_A20_A10_A01 = 0x21,    //I2C address A2 = 0, A1 = 0, A0 = 1
-  PCF8574_ADDR_A20_A10_A00 = 0x20,    //I2C address A2 = 0, A1 = 0, A0 = 0
+  PCF8574_ADDR_A21_A11_A01 = 0x27,    //i2c address A2 = 1, A1 = 1, A0 = 1 (by default)
+  PCF8574_ADDR_A21_A11_A00 = 0x26,    //i2c address A2 = 1, A1 = 1, A0 = 0
+  PCF8574_ADDR_A21_A10_A01 = 0x25,    //i2c address A2 = 1, A1 = 0, A0 = 1
+  PCF8574_ADDR_A21_A10_A00 = 0x24,    //i2c address A2 = 1, A1 = 0, A0 = 0
+  PCF8574_ADDR_A20_A11_A01 = 0x23,    //i2c address A2 = 0, A1 = 1, A0 = 1
+  PCF8574_ADDR_A20_A11_A00 = 0x22,    //i2c address A2 = 0, A1 = 1, A0 = 0
+  PCF8574_ADDR_A20_A10_A01 = 0x21,    //i2c address A2 = 0, A1 = 0, A0 = 1
+  PCF8574_ADDR_A20_A10_A00 = 0x20,    //i2c address A2 = 0, A1 = 0, A0 = 0
 
-  PCF8574A_ADDR_A21_A11_A01 = 0x3F,   //I2C address A2 = 1, A1 = 1, A0 = 1
-  PCF8574A_ADDR_A21_A11_A00 = 0x3E,   //I2C address A2 = 1, A1 = 1, A0 = 0
-  PCF8574A_ADDR_A21_A10_A01 = 0x3D,   //I2C address A2 = 1, A1 = 0, A0 = 1
-  PCF8574A_ADDR_A21_A10_A00 = 0x3C,   //I2C address A2 = 1, A1 = 0, A0 = 0
-  PCF8574A_ADDR_A20_A11_A01 = 0x3B,   //I2C address A2 = 0, A1 = 1, A0 = 1
-  PCF8574A_ADDR_A20_A11_A00 = 0x3A,   //I2C address A2 = 0, A1 = 1, A0 = 0
-  PCF8574A_ADDR_A20_A10_A01 = 0x39,   //I2C address A2 = 0, A1 = 0, A0 = 1
-  PCF8574A_ADDR_A20_A10_A00 = 0x38    //I2C address A2 = 0, A1 = 0, A0 = 0
+  PCF8574A_ADDR_A21_A11_A01 = 0x3F,   //i2c address A2 = 1, A1 = 1, A0 = 1
+  PCF8574A_ADDR_A21_A11_A00 = 0x3E,   //i2c address A2 = 1, A1 = 1, A0 = 0
+  PCF8574A_ADDR_A21_A10_A01 = 0x3D,   //i2c address A2 = 1, A1 = 0, A0 = 1
+  PCF8574A_ADDR_A21_A10_A00 = 0x3C,   //i2c address A2 = 1, A1 = 0, A0 = 0
+  PCF8574A_ADDR_A20_A11_A01 = 0x3B,   //i2c address A2 = 0, A1 = 1, A0 = 1
+  PCF8574A_ADDR_A20_A11_A00 = 0x3A,   //i2c address A2 = 0, A1 = 1, A0 = 0
+  PCF8574A_ADDR_A20_A10_A01 = 0x39,   //i2c address A2 = 0, A1 = 0, A0 = 1
+  PCF8574A_ADDR_A20_A10_A00 = 0x38    //i2c address A2 = 0, A1 = 0, A0 = 0
 }
 PCF8574_address;
 
 /* PCF8574 backlight controls */
 typedef enum
 {
-  POSITIVE = 0x01,                    //transistor switching polarity positive
-  NEGATIVE = 0x00                     //transistor switching polarity negative
+  POSITIVE = 0x01,                    //transistor switching polarity, positive
+  NEGATIVE = 0x00                     //transistor switching polarity, negative
 }
 switchPolarity;
 
@@ -197,8 +197,10 @@ class LiquidCrystal_I2C : public Print
    void shiftDecrement(void);
    void autoscroll(void);
    void noAutoscroll(void); 
-   void createChar(uint8_t CGRAM_address, uint8_t *char_pattern);
+   void createChar(uint8_t CGRAM_address,       uint8_t *char_pattern);
+   #if defined (PROGMEM)
    void createChar(uint8_t CGRAM_address, const uint8_t *char_pattern);
+   #endif
    void noBacklight(void);
    void backlight(void);
 
@@ -209,7 +211,9 @@ class LiquidCrystal_I2C : public Print
    virtual void write(uint8_t value);
    #endif
 
-   /* Arduino Unsupported API functions */
+   /*************** !!! arduino not standard API functions !!! ***************/
+   void displayOff(void);
+   void displayOn(void);  
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
@@ -232,7 +236,7 @@ class LiquidCrystal_I2C : public Print
    void    writePCF8574(uint8_t value);
    uint8_t readPCF8574(void);
    bool    readBusyFlag(void);
-   uint8_t readAddressCounter(void);
+   uint8_t getCursorPosition(void);
 };
 
 #endif
