@@ -233,7 +233,7 @@ class LiquidCrystal_I2C : public Print
    void    initialization(void);
    void    send(uint8_t mode, uint8_t value, uint8_t length);
    uint8_t portMapping(uint8_t value);
-   void    writePCF8574(uint8_t value);
+   bool    writePCF8574(uint8_t value);
    uint8_t readPCF8574(void);
    bool    readBusyFlag(void);
    uint8_t getCursorPosition(void);
