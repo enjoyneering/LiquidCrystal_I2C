@@ -732,18 +732,18 @@ inline uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
       4 - other error
 */
 /**************************************************************************/
-void LiquidCrystal_I2C::writePCF8574(uint8_t value)
+bool LiquidCrystal_I2C::writePCF8574(uint8_t value)
 {
-  do
-  {
-    Wire.beginTransmission(_PCF8574_address);
-    #if ARDUINO >= 100
-    Wire.write(value | _backlightValue);
-    #else
-    Wire.send(value | _backlightValue);
-    #endif
-  }
-  while (Wire.endTransmission(true) != 0);
+  Wire.beginTransmission(_PCF8574_address);
+
+  #if ARDUINO >= 100
+  Wire.write(value | _backlightValue);
+  #else
+  Wire.send(value | _backlightValue);
+  #endif
+
+  if (Wire.endTransmission(true) == 0) return true;
+                                       return false;
 }
 
 /**************************************************************************/
@@ -764,22 +764,23 @@ void LiquidCrystal_I2C::writePCF8574(uint8_t value)
 /**************************************************************************/
 uint8_t LiquidCrystal_I2C::readPCF8574()
 {
-  do
-  {
-    #if defined(_VARIANT_ARDUINO_STM32_)
-    Wire.requestFrom(_PCF8574_address, 1);
-    #else
-    Wire.requestFrom(_PCF8574_address, 1, true); //true, stop message after transmission & releas the I2C bus
-    #endif  
-  }
-  while (Wire.available() != 1);                 //check "wire.h" rxBuffer
-
-  /* reads byte from "wire.h" rxBuffer */
-  #if ARDUINO >= 100
-  return Wire.read();
+  #if defined(_VARIANT_ARDUINO_STM32_)
+  Wire.requestFrom(_PCF8574_address, 1);
   #else
-  return Wire.receive();
+  Wire.requestFrom(_PCF8574_address, 1, true); //true, stop message after transmission & releas I2C bus
   #endif
+
+  if (Wire.available() == 1)                   //check "wire.h" rxBuffer
+  {
+    /* reads byte from "wire.h" rxBuffer */
+    #if ARDUINO >= 100
+    return Wire.read();
+    #else
+    return Wire.receive();
+    #endif
+  }
+
+  return false;
 }
 
 /**************************************************************************/
