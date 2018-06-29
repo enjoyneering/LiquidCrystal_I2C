@@ -19,9 +19,8 @@
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
-                                           *STM32F103xxxx pins B7/B7 are 5v tolerant,
-                                            but bi-directional logic level converter
-                                            is recommended
+                                           *STM32F103xxxx pins PB6/PB7 are 5v tolerant, but
+                                            bi-directional logic level converter is recommended
 
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
@@ -112,7 +111,7 @@
    NOTE: all controls formated as DB7, DB6, DB5, DB4=(DL), DB3=(N), DB2=(F), DB1=*, DB0=*
 */
 #define LCD_8BIT_MODE            0x10 //select 8-bit interface            (DL)
-#define LCD_4BIT_MODE            0x00 //select 4 bit interface            (DL)
+#define LCD_4BIT_MODE            0x00 //select 4-bit interface            (DL)
 #define LCD_1_LINE               0x00 //selects one line display          (N)
 #define LCD_2_LINE               0x08 //selects two or more lines display (N)
 
@@ -125,7 +124,6 @@ lcd_font_size;
 
 
 /* lcd misc. */
-//#define LCD_EN_PULSE_DELAY     1    //duration of the En pulse, in microseconds
 #define LCD_HOME_CLEAR_DELAY     2    //duration of home & clear commands, in milliseconds
 #define LCD_COMMAND_DELAY        43   //duration of command, in microseconds
 #define LCD_CMD_LENGTH_8BIT      8    //8-bit command length
@@ -218,8 +216,8 @@ class LiquidCrystal_I2C : public Print
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
   private:
-   uint8_t _displayControl  = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2=(D), DB1=(C),   DB0=(B)
-   uint8_t _displayMode     = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2,     DB1=(I/D), DB0=(S)
+   uint8_t _displayControl = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2=(D), DB1=(C),   DB0=(B)
+   uint8_t _displayMode    = 0; //don't change!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2,     DB1=(I/D), DB0=(S)
    uint8_t _lcd_colums;
    uint8_t _lcd_rows;
    uint8_t _backlightValue;
