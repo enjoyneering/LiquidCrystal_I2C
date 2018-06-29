@@ -19,7 +19,7 @@
   ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
 
-                                           *STM32F103xxxx pins B7/B7 are 5v tolerant, but
+                                           *STM32F103xxxx pins PB6/PB7 are 5v tolerant, but
                                             bi-directional logic level converter is recommended
 
   Frameworks & Libraries:
@@ -42,8 +42,6 @@
 
     Constructor. Initializes the class variables, defines I2C address,
     LCD & PCF8574 pins.
-
-    NOTE: The constructor does not reset & initialize the LCD.
 */
 /**************************************************************************/  
 LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P1, uint8_t P2, uint8_t P3, uint8_t P4, uint8_t P5, uint8_t P6, uint8_t P7, switchPolarity polarity)
@@ -116,8 +114,7 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P
 /*
     begin()
 
-    Initializes, resets & configures I2C and LCD (call this function before
-    doing anything else)
+    Initializes, resets & configures I2C bus & LCD
 
     NOTE:
     - Wire.endTransmission() returned code:
@@ -492,7 +489,7 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pa
 
     NOTE:
     - doesn't affect lcd controller, because we are working with
-      transistor conncted to the PCF8574 port
+      transistor conncted to PCF8574 port
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::noBacklight(void)
@@ -521,7 +518,7 @@ void LiquidCrystal_I2C::noBacklight(void)
 
     NOTE:
     - doesn't affect lcd controller, because we are working with
-      transistor conncted to the PCF8574 port
+      transistor conncted to PCF8574 port
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::backlight(void)
@@ -581,14 +578,14 @@ void LiquidCrystal_I2C::initialization(void)
   uint8_t displayFunction = 0; //don't change!!! default bits value DB7, DB6, DB5, DB4=(DL), DB3=(N), DB2=(F), DB1, DB0
 
   /*
-     HD44780/WH160xB & etc need ~40ms after voltage rises above 2.7v
-     some Arduino can start & execute the code at 2.4v, so we'll wait 700ms
+     HD44780 & clones needs ~40ms after voltage rises above 2.7v
+     some Arduino boards can start & execute code at 2.4v, so we'll wait 700ms
   */
   delay(700);
 
   /*
      FIRST ATTEMPT: set 8-bit mode
-     - wait > 4.1ms, some LCDs need more than 4.5ms so we'll wait 7ms
+     - wait > 4.1ms, some LCD even slower than 4.5ms
      - for Hitachi & Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
@@ -615,8 +612,8 @@ void LiquidCrystal_I2C::initialization(void)
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_4BIT_MODE, LCD_CMD_LENGTH_4BIT);
 
-  /* sets qnt. of lines, 1 line by default */
-  if (_lcd_rows > 1) displayFunction |= LCD_2_LINE;   //line bit located at BD3 & zero by default
+  /* sets qnt. of lines */
+  if (_lcd_rows > 1) displayFunction |= LCD_2_LINE;    //line bit located at BD3 & zero/1 line by default
 
   /* sets font size, 5x8 by default */
   if (_lcd_font_size == LCD_5x10DOTS)
@@ -660,12 +657,12 @@ void LiquidCrystal_I2C::initialization(void)
 void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
 {
   /* 4-bit or 1-st part of 8-bit command */
-  uint8_t lsb  = value >> 3;               //0,0,0,DB7,DB6,DB5,DB4,DB3
-          lsb &= 0x1E;                     //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0
-  uint8_t data = portMapping(mode | lsb);  //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+  uint8_t lsb  = value >> 3;                //0,0,0,DB7,DB6,DB5,DB4,DB3
+          lsb &= 0x1E;                      //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0
+  uint8_t data = portMapping(mode | lsb);   //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
 
   writePCF8574(data);                       //send command
-  //En pulse duration > 450nsec             //delayMicroseconds(LCD_EN_PULSE_DELAY);
+                                            //En pulse duration > 450nsec
   bitClear(data, _LCD_TO_PCF8574[5]);       //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
   writePCF8574(data);                       //execute command
   delayMicroseconds(LCD_COMMAND_DELAY);     //command duration
@@ -678,7 +675,7 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
             data = portMapping(mode | msb); //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
 
     writePCF8574(data);                     //send command
-    //En pulse duration > 450nsec           //delayMicroseconds(LCD_EN_PULSE_DELAY);
+                                            //En pulse duration > 450nsec
     bitClear(data, _LCD_TO_PCF8574[5]);     //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
     writePCF8574(data);                     //execute command
     delayMicroseconds(LCD_COMMAND_DELAY);   //command duration
@@ -689,7 +686,7 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
 /*
     portMapping()
 
-    All magic of pins to ports mapping is happening here!!!
+    All magic of all lcd pins to ports mapping is happening here!!!
 
     NOTE:
     - input value formated as:
@@ -701,19 +698,26 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
         0       1   2  3   4   5  6  7
       {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} 
 
-    - shifts value bits to the right PCF8574 ports position P7..P0
-      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} -shift-> RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED
-      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} -shift-> RS,RW,E,DB3,DB2,DB1,DB0,BCK_LED
+    - shifts value bits to the right PCF8574 ports
+      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} shift-> to ports position P7..P0
+      {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} shift-> to ports position P7..P0
 */
 /**************************************************************************/
 inline uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
 {
   uint8_t data = 0;
 
+  /* mapping value = RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED */
   for (int8_t i = 7; i >= 0; i--)
   {
-    bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, i));
+    switch (bitRead(value, i))              //slow method bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, i));
+    {
+      case 1:
+        data |= 0x01 << _LCD_TO_PCF8574[i];
+        break;
+    }
   }
+
   return data; 
 }
 
