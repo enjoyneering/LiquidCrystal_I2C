@@ -579,9 +579,9 @@ void LiquidCrystal_I2C::initialization(void)
 
   /*
      HD44780 & clones needs ~40ms after voltage rises above 2.7v
-     some Arduino boards can start & execute code at 2.4v, so we'll wait 700ms
+     some Arduino boards can start & execute code at 2.4v, so we'll wait 500ms
   */
-  delay(700);
+  delay(500);
 
   /*
      FIRST ATTEMPT: set 8-bit mode
@@ -589,7 +589,7 @@ void LiquidCrystal_I2C::initialization(void)
      - for Hitachi & Winstar displays
   */
   send(LCD_INSTRUCTION_WRITE, LCD_FUNCTION_SET | LCD_8BIT_MODE, LCD_CMD_LENGTH_4BIT);
-  delay(7);
+  delay(5);
 
   /*
      SECOND ATTEMPT: set 8-bit mode
@@ -656,29 +656,32 @@ void LiquidCrystal_I2C::initialization(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
 {
-  /* 4-bit or 1-st part of 8-bit command */
-  uint8_t lsb  = value >> 3;                //0,0,0,DB7,DB6,DB5,DB4,DB3
-          lsb &= 0x1E;                      //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0
-  uint8_t data = portMapping(mode | lsb);   //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+  uint8_t  halfByte = 0; //lsb or msb
+  uint8_t  data     = 0;
 
-  writePCF8574(data);                       //send command
-                                            //En pulse duration > 450nsec
-  bitClear(data, _LCD_TO_PCF8574[5]);       //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
-  writePCF8574(data);                       //execute command
-  delayMicroseconds(LCD_COMMAND_DELAY);     //command duration
+  /* 4-bit or 1-st part of 8-bit command */
+  halfByte  = value >> 3;                     //0,0,0,DB7,DB6,DB5,DB4,DB3
+  halfByte &= 0x1E;                           //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0
+  data      = portMapping(mode | halfByte);   //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+
+  writePCF8574(data);                         //send command
+                                              //En pulse duration > 450nsec
+  bitClear(data, _LCD_TO_PCF8574[5]);         //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
+  writePCF8574(data);                         //execute command
+  delayMicroseconds(LCD_COMMAND_DELAY);       //command duration
 
   /* second part of 8-bit command */
   if (length == LCD_CMD_LENGTH_8BIT)
   {
-    uint8_t msb  = value << 1;              //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
-            msb &= 0x1E;                    //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0
-            data = portMapping(mode | msb); //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
+    halfByte  = value << 1;                   //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
+    halfByte &= 0x1E;                         //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0
+    data      = portMapping(mode | halfByte); //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
 
-    writePCF8574(data);                     //send command
-                                            //En pulse duration > 450nsec
-    bitClear(data, _LCD_TO_PCF8574[5]);     //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
-    writePCF8574(data);                     //execute command
-    delayMicroseconds(LCD_COMMAND_DELAY);   //command duration
+    writePCF8574(data);                       //send command
+                                              //En pulse duration > 450nsec
+    bitClear(data, _LCD_TO_PCF8574[5]);       //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
+    writePCF8574(data);                       //execute command
+    delayMicroseconds(LCD_COMMAND_DELAY);     //command duration
   }	
 }
 
@@ -701,6 +704,9 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
     - shifts value bits to the right PCF8574 ports
       {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} shift-> to ports position P7..P0
       {BCK_LED,DB4,DB5,DB6,DB7,E,RW,RS} shift-> to ports position P7..P0
+
+    - "switch case" is 32us faster than
+      bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, i));
 */
 /**************************************************************************/
 inline uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
@@ -710,7 +716,7 @@ inline uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
   /* mapping value = RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED */
   for (int8_t i = 7; i >= 0; i--)
   {
-    switch (bitRead(value, i))              //slow method bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, i));
+    switch (bitRead(value, i))              //"switch case" has smaller footprint than "if else"
     {
       case 1:
         data |= 0x01 << _LCD_TO_PCF8574[i];
