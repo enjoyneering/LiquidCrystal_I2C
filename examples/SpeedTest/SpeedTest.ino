@@ -35,7 +35,8 @@
 #define COLUMS      20
 #define ROWS        4
 
-char alphabet[26] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+/* PROGMEM saves variable to flash & keeps dynamic memory free */
+const char alphabet[26] PROGMEM = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 
 char     letter     = '0';
 uint32_t startTimer =  0;
