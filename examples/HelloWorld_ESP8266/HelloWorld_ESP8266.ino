@@ -25,7 +25,7 @@
   - https://www.gnu.org/licenses/licenses.html
 */
 /***************************************************************************************************/
-#include <Wire.h>              //https://github.com/enjoyneering/ESP8266-I2C-Driver
+#include <Wire.h>              //use bug free i2c driver https://github.com/enjoyneering/ESP8266-I2C-Driver
 #include <LiquidCrystal_I2C.h>
 #include <ESP8266WiFi.h>
 
