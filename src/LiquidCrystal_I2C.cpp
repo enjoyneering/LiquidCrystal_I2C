@@ -10,20 +10,20 @@
   sourse code: https://github.com/enjoyneering/
 
   This chip uses I2C bus to communicate, specials pins are required to interface
-  Board:                                    SDA                    SCL
-  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5
-  Mega2560, Due............................ 20                     21
-  Leonardo, Micro, ATmega32U4.............. 2                      3
-  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7
-  Blue Pill, STM32F103xxxx boards.......... PB7*                   PB6*
-  ESP8266 ESP-01:.......................... GPIO0/D5               GPIO2/D3
-  NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1
-
-                                           *STM32F103xxxx pins PB6/PB7 are 5v tolerant, but
-                                            bi-directional logic level converter is recommended
+  Board:                                    SDA                    SCL                    Level
+  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5                     5v
+  Mega2560................................. 20                     21                     5v
+  Due, SAM3X8E............................. 20                     21                     3.3v
+  Leonardo, Micro, ATmega32U4.............. 2                      3                      5v
+  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7    5v
+  Blue Pill, STM32F103xxxx boards.......... PB7                    PB6                    3.3v/5v
+  ESP8266 ESP-01........................... GPIO0/D5               GPIO2/D3               3.3v/5v
+  NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1               3.3v/5v
+  ESP32.................................... GPIO21/D21             GPIO22/D22             3.3v
 
   Frameworks & Libraries:
   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
+  ESP32 Core            - https://github.com/espressif/arduino-esp32
   ESP8266 Core          - https://github.com/esp8266/Arduino
   ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
@@ -889,7 +889,7 @@ void LiquidCrystal_I2C::printHorizontalGraph(char name, uint8_t row, uint16_t cu
     }
 
     /* fill the left overs (from the previous draw) with spaces */
-    for (colum; colum < _lcd_colums; colum++)
+    while (colum++ < _lcd_colums)
     {
       send(LCD_DATA_WRITE, 0x20, LCD_CMD_LENGTH_8BIT);             //print 0x20 - built in "space" symbol, see p.17 & p.30 of HD44780 datasheet
     }
@@ -929,11 +929,11 @@ void LiquidCrystal_I2C::displayOn(void)
     setBrightness()
 
     NOTE:
-    - to use this function, the "LED" jumper on the back has to be
-      removed & the bottom pin has to be connected to one of Arduino PWM
-      pin in series with 470 Ohm resistor
+    - to use this function, the "LED" jumper on the back of backpack has
+      to be removed & the top pin has to be connected to one of Arduino
+      PWM pin in series with 470 Ohm resistor
     - recomended min. value = 25, max. value = 255 (0.5v .. 4.5v)
-                 min. value = 0,  max. value = 255 (0.0v .. 4.5v)  
+                 min. value = 0,  max. value = 255 (0.0v .. 4.5v) 
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, switchPolarity polarity)
