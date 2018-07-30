@@ -39,7 +39,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8, pins B6/B7 are 5v tolerant, but bi-directional logic level converter is recommended
+  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums - 20, rows - 4, pixels - 5x8
   {
     Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal."));
     delay(5000);
