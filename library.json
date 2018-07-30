@@ -1,0 +1,18 @@
+{
+  "name":        "LiquidCrystal_I2C",
+  "keywords":    "lcd, i2c, hd44780, wh1602b, wh1604b, screen, pcf8574, LiquidCrystal",
+  "description": "Hitachi HD44780 & clone LCD screens over I²C expander PCF8574",
+  "authors":
+  {
+    "name":  "ejoyneering",
+    "email": "enjoyneering@protonmail.com"
+  },
+  "repository":
+  {
+    "type": "git",
+    "url":  "https://github.com/enjoyneering/LiquidCrystal_I2C.git"
+  },
+  "version":    "1.2.3",
+  "frameworks": "arduino",
+  "platforms": "*"
+}
