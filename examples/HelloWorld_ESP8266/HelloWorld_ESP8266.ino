@@ -55,16 +55,16 @@ void setup()
   lcd.clear();
 
   /* prints static text */
-  lcd.setCursor(0, 1);            //set 1-st colum & 2-nd row. NOTE: 1-st colum & row started at zero
+  lcd.setCursor(0, 1);            //set 1-st colum & 2-nd row, 1-st colum & row started at zero
   lcd.print(F("Hello world!"));
-  lcd.setCursor(0, 2);            //set 1-st colum & 3-rd row. NOTE: 1-st colum & row started at zero
+  lcd.setCursor(0, 2);            //set 1-st colum & 3-rd row, 1-st colum & row started at zero
   lcd.print(F("Random number:"));
 }
 
 void loop()
 {
   /* prints dynamic text */
-  lcd.setCursor(14, 2);          //set 15-th colum & 3-rd  row. NOTE: 1-st colum & row started at zero
+  lcd.setCursor(14, 2);          //set 15-th colum & 3-rd  row, 1-st colum & row started at zero
   lcd.print(random(10, 1000));
   lcd.write(LCD_SPACE_SYMBOL);
 
