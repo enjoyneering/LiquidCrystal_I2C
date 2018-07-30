@@ -4,4 +4,5 @@ This is fast Arduino library for HD44780 LCD display and its clones. Operated in
 Supports:
 - Arduino AVR
 - Arduino ESP8266
+- Arduino ESP32
 - Arduino STM32
