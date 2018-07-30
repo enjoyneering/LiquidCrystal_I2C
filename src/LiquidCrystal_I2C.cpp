@@ -309,24 +309,32 @@ void LiquidCrystal_I2C::blink(void)
 /*
     scrollDisplayLeft()
 
-    Scrolls current row with text on the display to the left.
+    Scrolls once current row with text on the display to the left
+
+    NOTE:
+    - call this function just before write() or print()
+    - text grows from cursor to the left
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::scrollDisplayLeft(void)
 {
-  send(LCD_INSTRUCTION_WRITE, LCD_CURSOR_SHIFT | LCD_DISPLAY_MOVE | LCD_MOVE_LEFT, LCD_CMD_LENGTH_8BIT);
+  send(LCD_INSTRUCTION_WRITE, LCD_CURSOR_DISPLAY_SHIFT | LCD_DISPLAY_SHIFT | LCD_SHIFT_LEFT, LCD_CMD_LENGTH_8BIT);
 }
 
 /**************************************************************************/
 /*
     scrollDisplayRight()
 
-    Scrolls current row with text on the display to the right.
+    Scrolls once current row with text on the display to the right
+
+    NOTE:
+    - call this function just before write() or print()
+    - text & cursor grows together to the left from cursor position
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::scrollDisplayRight(void)
 {
-  send(LCD_INSTRUCTION_WRITE, LCD_CURSOR_SHIFT | LCD_DISPLAY_MOVE | LCD_MOVE_RIGHT, LCD_CMD_LENGTH_8BIT);
+  send(LCD_INSTRUCTION_WRITE, LCD_CURSOR_DISPLAY_SHIFT | LCD_DISPLAY_SHIFT | LCD_SHIFT_RIGHT, LCD_CMD_LENGTH_8BIT);
 }
 
 /**************************************************************************/
@@ -361,10 +369,12 @@ void LiquidCrystal_I2C::rightToLeft(void)
 /*
     autoscroll()
 
-    Autoscrolls the text on the display
+    Autoscrolls the text rightToLeft() or rightToRight() on the display
 
     NOTE:
     - whole text on the display shift when byte written, but cursor stays
+    - same as scrollDisplayRight() or scrollDisplayLeft() but no need to
+      call it the loop, just call it once it setup()
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::autoscroll(void) 
@@ -682,7 +692,7 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
     bitClear(data, _LCD_TO_PCF8574[5]);       //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
     writePCF8574(data);                       //execute command
     delayMicroseconds(LCD_COMMAND_DELAY);     //command duration
-  }	
+  }
 }
 
 /**************************************************************************/
@@ -709,7 +719,7 @@ void LiquidCrystal_I2C::send(uint8_t mode, uint8_t value, uint8_t length)
       bitWrite(data, _LCD_TO_PCF8574[i], bitRead(value, i));
 */
 /**************************************************************************/
-inline uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
+uint8_t LiquidCrystal_I2C::portMapping(uint8_t value)
 {
   uint8_t data = 0;
 
@@ -779,18 +789,14 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
   #else
   Wire.requestFrom(_PCF8574_address, 1, true); //true, stop message after transmission & releas I2C bus
   #endif
+  if (Wire.available() != 1) return false;     //check "wire.h" rxBuffer & error handler, collision on the i2c bus
 
-  if (Wire.available() == 1)                   //check "wire.h" rxBuffer
-  {
-    /* reads byte from "wire.h" rxBuffer */
-    #if ARDUINO >= 100
-    return Wire.read();
-    #else
-    return Wire.receive();
-    #endif
-  }
-
-  return false;
+  /* reads byte from "wire.h" rxBuffer */
+  #if ARDUINO >= 100
+  return Wire.read();
+  #else
+  return Wire.receive();
+  #endif
 }
 
 /**************************************************************************/
@@ -871,28 +877,28 @@ uint8_t LiquidCrystal_I2C::getCursorPosition()
 /**************************************************************************/
 void LiquidCrystal_I2C::printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue)
 {
-    uint8_t currentGraph = 0;
-    uint8_t colum        = 0;
+  uint8_t currentGraph = 0;
+  uint8_t colum        = 0;
 
-    if (currentValue > maxValue) currentValue = maxValue;          //safety check, without it ESP8266 reboots
+  if (currentValue > maxValue) currentValue = maxValue;          //safety check, to prevent ESP8266 crash
 
-    currentGraph = map(currentValue, 0, maxValue, 0, _lcd_colums);
+  currentGraph = map(currentValue, 0, maxValue, 0, _lcd_colums);
 
+  setCursor(colum, row);
+  send(LCD_DATA_WRITE, name, LCD_CMD_LENGTH_8BIT);
+
+  /* draw the horizontal bar without clearing the display, to eliminate flickering */
+  for (colum = 1; colum < currentGraph; colum++)
+  {
     setCursor(colum, row);
-    send(LCD_DATA_WRITE, name, LCD_CMD_LENGTH_8BIT);
+    send(LCD_DATA_WRITE, 0xFF, LCD_CMD_LENGTH_8BIT);             //print 0xFF - built in "solid square" symbol, see p.17 & p.30 of HD44780 datasheet
+  }
 
-    /* draw the horizontal bar without clearing the display, to eliminate flickering */
-    for (colum = 1; colum < currentGraph; colum++)
-    {
-      setCursor(colum, row);
-      send(LCD_DATA_WRITE, 0xFF, LCD_CMD_LENGTH_8BIT);             //print 0xFF - built in "solid square" symbol, see p.17 & p.30 of HD44780 datasheet
-    }
-
-    /* fill the left overs (from the previous draw) with spaces */
-    while (colum++ < _lcd_colums)
-    {
-      send(LCD_DATA_WRITE, 0x20, LCD_CMD_LENGTH_8BIT);             //print 0x20 - built in "space" symbol, see p.17 & p.30 of HD44780 datasheet
-    }
+  /* fill the rest with spaces */
+  while (colum++ < _lcd_colums)
+  {
+    send(LCD_DATA_WRITE, 0x20, LCD_CMD_LENGTH_8BIT);             //print 0x20 - built in "space" symbol, see p.17 & p.30 of HD44780 datasheet
+  }
 }
 
 /**************************************************************************/
@@ -915,7 +921,7 @@ void LiquidCrystal_I2C::displayOff(void)
 /*
     displayOn()
 
-    Turns on backlight via PCF8574 & retrives text from DDRAM
+    Turns on backlight via PCF8574 & shows text from DDRAM
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::displayOn(void)
@@ -933,7 +939,7 @@ void LiquidCrystal_I2C::displayOn(void)
       to be removed & the top pin has to be connected to one of Arduino
       PWM pin in series with 470 Ohm resistor
     - recomended min. value = 25, max. value = 255 (0.5v .. 4.5v)
-                 min. value = 0,  max. value = 255 (0.0v .. 4.5v) 
+                 min. value = 0,  max. value = 255 (0.0v .. 4.5v)  
 */
 /**************************************************************************/
 void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, switchPolarity polarity)
