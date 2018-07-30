@@ -483,10 +483,9 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pa
 
   send(LCD_INSTRUCTION_WRITE, LCD_CGRAM_ADDR_SET | (CGRAM_address << 3), LCD_CMD_LENGTH_8BIT); //set CGRAM address
 
-  while (font_size > 0)
+  while (font_size-- > 0)
   {
     send(LCD_DATA_WRITE, pgm_read_byte(char_pattern++), LCD_CMD_LENGTH_8BIT);                  //write data from flash memory to CGRAM address
-    font_size--;                                                                               //qnt of cells to send
   }
 }
 #endif
