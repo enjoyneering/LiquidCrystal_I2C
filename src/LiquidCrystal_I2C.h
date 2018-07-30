@@ -72,7 +72,7 @@
 #define LCD_RETURN_HOME          0x02 //moves cursor position to home position
 #define LCD_ENTRY_MODE_SET       0x04 //sets cursor type, text direction (I/D) & display shift direction (S)
 #define LCD_DISPLAY_CONTROL      0x08 //sets display on/off (D), cursor on/off (C) & cursor blinking on/off (B)
-#define LCD_CURSOR_SHIFT         0x10 //moves cursor & shifts display without changing DDRAM contents
+#define LCD_CURSOR_DISPLAY_SHIFT 0x10 //cursor or display/text shifts without changing DDRAM contents
 #define LCD_FUNCTION_SET         0x20 //sets data length (DL), number of lines (N) & font size (F)
 #define LCD_CGRAM_ADDR_SET       0x40 //sets CGRAM address. CGRAM data is sent & received after this setting
 #define LCD_DDRAM_ADDR_SET       0x80 //sets DDRAM address/cursor position
@@ -98,13 +98,13 @@
 #define LCD_BLINK_CURSOR_OFF     0x00 //turns OFF blinking  cursor (B)
 
 /*
-   LCD_CURSOR_SHIFT controls
+   LCD_CURSOR_DISPLAY_SHIFT controls
    NOTE: all controls formated as DB7, DB6, DB5, DB4, DB3=(SC), DB2=(RL), DB1=*, DB0=*
 */
-#define LCD_DISPLAY_MOVE         0x08 //display/text shifts after char print (SC)
-#define LCD_CURSOR_MOVE          0x00 //cursor shifts after char print       (SC)
-#define LCD_MOVE_RIGHT           0x04 //cursor or display shifts to right (RL)
-#define LCD_MOVE_LEFT            0x00 //cursor or display shifts to left  (RL)
+#define LCD_DISPLAY_SHIFT        0x08 //display/text shifts after char print (SC)
+#define LCD_CURSOR_SHIFT         0x00 //cursor shifts after char print       (SC)
+#define LCD_SHIFT_RIGHT          0x04 //cursor or display/text shifts to right (RL)
+#define LCD_SHIFT_LEFT           0x00 //cursor or display/text shifts to left  (RL)
 
 /*
    LCD_FUNCTION_SET controls
@@ -187,12 +187,8 @@ class LiquidCrystal_I2C : public Print
    void cursor(void);
    void scrollDisplayLeft(void);
    void scrollDisplayRight(void);
-   void printLeft(void);
-   void printRight(void);
    void leftToRight(void);
    void rightToLeft(void);
-   void shiftIncrement(void);
-   void shiftDecrement(void);
    void autoscroll(void);
    void noAutoscroll(void); 
    void createChar(uint8_t CGRAM_address,       uint8_t *char_pattern);
@@ -204,15 +200,15 @@ class LiquidCrystal_I2C : public Print
 
    /* replacement for "write()" function in Arduino class "Print" */
    #if defined(ARDUINO) && ARDUINO >= 100
-   virtual size_t write(uint8_t value);
+   size_t write(uint8_t value);
    #else
-   virtual void write(uint8_t value);
+   void write(uint8_t value);
    #endif
 
    /*************** !!! arduino not standard API functions !!! ***************/
+   void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void displayOff(void);
    void displayOn(void);  
-   void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
 	 
   private:
@@ -228,13 +224,13 @@ class LiquidCrystal_I2C : public Print
    lcd_font_size   _lcd_font_size;
    switchPolarity  _switchPolarity;
 
-   void    initialization(void);
-   void    send(uint8_t mode, uint8_t value, uint8_t length);
-   uint8_t portMapping(uint8_t value);
-   bool    writePCF8574(uint8_t value);
-   uint8_t readPCF8574(void);
-   bool    readBusyFlag(void);
-   uint8_t getCursorPosition(void);
+          void    initialization(void);
+          void    send(uint8_t mode, uint8_t value, uint8_t length);
+   inline uint8_t portMapping(uint8_t value);
+          bool    writePCF8574(uint8_t value);
+          uint8_t readPCF8574(void);
+          bool    readBusyFlag(void);
+          uint8_t getCursorPosition(void);
 };
 
 #endif
