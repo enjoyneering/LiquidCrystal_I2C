@@ -115,7 +115,7 @@
 #define LCD_1_LINE               0x00 //selects one line display          (N)
 #define LCD_2_LINE               0x08 //selects two or more lines display (N)
 
-typedef enum
+typedef enum : uint8_t
 {
   LCD_5x10DOTS = 0x04,                //5x9+1 dots charecter+cursor font (F), 5x10 dots total
   LCD_5x8DOTS  = 0x00                 //5x7+1 dots charecter+cursor font (F), 5x8  dots total
@@ -136,7 +136,7 @@ lcd_font_size;
 #define PCF8574_DATA_HIGH        0x3E //sets PCF8574 pins to RS=0,RW=0,E=1,DB7=1,DB6=1,DB5=1,DB4=1,BCK_LED=0
 
 /* PCF8574 addresses */
-typedef enum
+typedef enum : uint8_t
 {
   PCF8574_ADDR_A21_A11_A01 = 0x27,    //i2c address A2 = 1, A1 = 1, A0 = 1 (by default)
   PCF8574_ADDR_A21_A11_A00 = 0x26,    //i2c address A2 = 1, A1 = 1, A0 = 0
@@ -159,7 +159,7 @@ typedef enum
 PCF8574_address;
 
 /* PCF8574 backlight controls */
-typedef enum
+typedef enum : uint8_t
 {
   POSITIVE = 0x01,                    //transistor switching polarity, positive
   NEGATIVE = 0x00                     //transistor switching polarity, negative
