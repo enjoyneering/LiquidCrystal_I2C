@@ -210,7 +210,7 @@ class LiquidCrystal_I2C : public Print
    void printHorizontalGraph(char name, uint8_t row, uint16_t currentValue, uint16_t maxValue);
    void displayOff(void);
    void displayOn(void);  
-   void setBrightness(uint8_t pin, uint8_t value, switchPolarity);
+   void setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity);
 	 
   private:
    uint8_t _displayControl = 0; //DO NOT CHANGE!!! default bits value: DB7, DB6, DB5, DB4, DB3, DB2=(D), DB1=(C),   DB0=(B)
