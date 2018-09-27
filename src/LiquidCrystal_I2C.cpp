@@ -1,35 +1,36 @@
 /***************************************************************************************************/
 /*
-  This is an Arduino library for HD44780, S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780,
-  WH160xB, AIP31066, GDM200xD, ADM0802A LCD displays.
+   This is an Arduino library for HD44780, S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780,
+   WH160xB, AIP31066, GDM200xD, ADM0802A LCD displays.
 
-  Screens are operated in 4 bit mode over I2C bus with 8-bit I/O expander PCF8574x.
-  Typical displays sizes: 8x2, 16x1, 16x2, 16x4, 20x2, 20x4 & etc.
+   Screens are operated in 4 bit mode over i2c bus with 8-bit I/O expander PCF8574x.
+   Typical displays sizes: 8x2, 16x1, 16x2, 16x4, 20x2, 20x4 & etc.
 
-  written by : enjoyneering79
-  sourse code: https://github.com/enjoyneering/
+   written by : enjoyneering79
+   sourse code: https://github.com/enjoyneering/
 
-  This chip uses I2C bus to communicate, specials pins are required to interface
-  Board:                                    SDA                    SCL                    Level
-  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5                     5v
-  Mega2560................................. 20                     21                     5v
-  Due, SAM3X8E............................. 20                     21                     3.3v
-  Leonardo, Micro, ATmega32U4.............. 2                      3                      5v
-  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7    5v
-  Blue Pill, STM32F103xxxx boards.......... PB7                    PB6                    3.3v/5v
-  ESP8266 ESP-01........................... GPIO0/D5               GPIO2/D3               3.3v/5v
-  NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1               3.3v/5v
-  ESP32.................................... GPIO21/D21             GPIO22/D22             3.3v
 
-  Frameworks & Libraries:
-  ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
-  ESP32 Core            - https://github.com/espressif/arduino-esp32
-  ESP8266 Core          - https://github.com/esp8266/Arduino
-  ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
-  STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
+   This chip uses I2C bus to communicate, specials pins are required to interface
+   Board:                                    SDA                    SCL                    Level
+   Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5                     5v
+   Mega2560................................. 20                     21                     5v
+   Due, SAM3X8E............................. 20                     21                     3.3v
+   Leonardo, Micro, ATmega32U4.............. 2                      3                      5v
+   Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7    5v
+   Blue Pill, STM32F103xxxx boards.......... PB7                    PB6                    3.3v/5v
+   ESP8266 ESP-01........................... GPIO0/D5               GPIO2/D3               3.3v/5v
+   NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1               3.3v/5v
+   ESP32.................................... GPIO21/D21             GPIO22/D22             3.3v
 
-  GNU GPL license, all text above must be included in any redistribution, see link below for details:
-  - https://www.gnu.org/licenses/licenses.html
+   Frameworks & Libraries:
+   ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
+   ESP32 Core            - https://github.com/espressif/arduino-esp32
+   ESP8266 Core          - https://github.com/esp8266/Arduino
+   ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
+   STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
+
+   GNU GPL license, all text above must be included in any redistribution,
+   see link for details  - https://www.gnu.org/licenses/licenses.html
 */
 /***************************************************************************************************/
 
@@ -44,13 +45,13 @@
     LCD & PCF8574 pins.
 */
 /**************************************************************************/  
-LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P1, uint8_t P2, uint8_t P3, uint8_t P4, uint8_t P5, uint8_t P6, uint8_t P7, switchPolarity polarity)
+LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P1, uint8_t P2, uint8_t P3, uint8_t P4, uint8_t P5, uint8_t P6, uint8_t P7, backlightPolarity polarity)
 {
   uint8_t PCF8574_TO_LCD[8] = {P0, P1, P2, P3, P4, P5, P6, P7}; //PCF8574 ports to LCD pins mapping array
 
   _PCF8574_address        = addr;
   _PCF8574_initialisation = true;
-  _switchPolarity         = polarity;
+  _backlightPolarity      = polarity;
 
   /* maping LCD pins to PCF8574 ports */
   for (uint8_t i = 0; i < 8; i++)
@@ -96,7 +97,7 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(PCF8574_address addr, uint8_t P0, uint8_t P
   }
 
   /* backlight control via PCF8574 */
-  switch (_switchPolarity)
+  switch (_backlightPolarity)
   {
     case POSITIVE:
       _backlightValue = LCD_BACKLIGHT_ON;
@@ -503,7 +504,7 @@ void LiquidCrystal_I2C::createChar(uint8_t CGRAM_address, const uint8_t *char_pa
 /**************************************************************************/
 void LiquidCrystal_I2C::noBacklight(void)
 {
-  switch (_switchPolarity)
+  switch (_backlightPolarity)
   {
     case POSITIVE:
       _backlightValue = LCD_BACKLIGHT_OFF;
@@ -532,7 +533,7 @@ void LiquidCrystal_I2C::noBacklight(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::backlight(void)
 {
-  switch (_switchPolarity)
+  switch (_backlightPolarity)
   {
     case POSITIVE:
       _backlightValue = LCD_BACKLIGHT_ON;
@@ -941,7 +942,7 @@ void LiquidCrystal_I2C::displayOn(void)
                  min. value = 0,  max. value = 255 (0.0v .. 4.5v)  
 */
 /**************************************************************************/
-void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, switchPolarity polarity)
+void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity)
 {
   pinMode(pin, OUTPUT);
 
