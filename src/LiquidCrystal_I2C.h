@@ -221,9 +221,9 @@ class LiquidCrystal_I2C : public Print
    uint8_t _LCD_TO_PCF8574[8];
    bool    _PCF8574_initialisation;
 
-   PCF8574_address _PCF8574_address;
-   lcd_font_size   _lcd_font_size;
-   switchPolarity  _switchPolarity;
+   PCF8574_address   _PCF8574_address;
+   lcd_font_size     _lcd_font_size;
+   backlightPolarity _backlightPolarity;
 
           void    initialization(void);
           void    send(uint8_t mode, uint8_t value, uint8_t length);
