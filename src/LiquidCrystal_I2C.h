@@ -118,8 +118,8 @@
 
 typedef enum : uint8_t
 {
-  LCD_5x10DOTS = 0x04,                 //5x9+1 dots charecter+cursor font (F), 5x10 dots total
-  LCD_5x8DOTS  = 0x00                  //5x7+1 dots charecter+cursor font (F), 5x8  dots total
+  LCD_5x10DOTS                 = 0x04, //5x9+1 dots charecter+cursor font (F), 5x10 dots total
+  LCD_5x8DOTS                  = 0x00  //5x7+1 dots charecter+cursor font (F), 5x8  dots total
 }
 lcd_font_size;
 
@@ -130,7 +130,7 @@ lcd_font_size;
 #define LCD_CMD_LENGTH_8BIT      8     //8-bit command length
 #define LCD_CMD_LENGTH_4BIT      4     //4-bit command length
 
-/* PCF8574 misc. */
+/* PCF8574 misc. controls */
 #define LCD_BACKLIGHT_ON         0x01
 #define LCD_BACKLIGHT_OFF        0x00
 #define PCF8574_ALL_LOW          0x00  //sets PCF8574 pins to RS=0,RW=0,E=0,DB7=0,DB6=0,DB5=0,DB4=0,BCK_LED=0
