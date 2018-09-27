@@ -12,7 +12,7 @@
     "type": "git",
     "url":  "https://github.com/enjoyneering/LiquidCrystal_I2C.git"
   },
-  "version":    "1.2.3",
+  "version":    "1.2.4",
   "frameworks": "arduino",
   "platforms": "*"
 }
