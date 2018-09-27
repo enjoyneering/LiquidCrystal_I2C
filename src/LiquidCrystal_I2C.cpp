@@ -557,7 +557,7 @@ void LiquidCrystal_I2C::backlight(void)
     to the LCD
 */
 /**************************************************************************/
-#if defined(ARDUINO) && ARDUINO >= 100
+#if defined(ARDUINO) && ((ARDUINO) >= 100)
 size_t LiquidCrystal_I2C::write(uint8_t value)
 #else
 void LiquidCrystal_I2C::write(uint8_t value)
@@ -565,7 +565,7 @@ void LiquidCrystal_I2C::write(uint8_t value)
 {
   send(LCD_DATA_WRITE, value, LCD_CMD_LENGTH_8BIT);
 
-  #if defined(ARDUINO) && ARDUINO >= 100
+  #if defined(ARDUINO) && ((ARDUINO) >= 100)
   return 1;
   #endif
 }
@@ -756,7 +756,7 @@ bool LiquidCrystal_I2C::writePCF8574(uint8_t value)
 {
   Wire.beginTransmission(_PCF8574_address);
 
-  #if ARDUINO >= 100
+  #if defined(ARDUINO) && ((ARDUINO) >= 100)
   Wire.write(value | _backlightValue);
   #else
   Wire.send(value | _backlightValue);
@@ -792,7 +792,7 @@ uint8_t LiquidCrystal_I2C::readPCF8574()
   if (Wire.available() != 1) return false;     //check "wire.h" rxBuffer & error handler, collision on the i2c bus
 
   /* reads byte from "wire.h" rxBuffer */
-  #if ARDUINO >= 100
+  #if defined(ARDUINO) && ((ARDUINO) >= 100)
   return Wire.read();
   #else
   return Wire.receive();
