@@ -6,7 +6,7 @@ The 99.9% of all I²C backpacks from eBay connected like this:
 
 PCF8574 ports    LCD pins
 
--P0               4/RS
+-P0...............4/RS
 -P1               5/RW
 -P2               6/En
 -P3               16/BACKLIGHT LED-, turn-on level HIGH/POSITIVE
