@@ -5,7 +5,7 @@ This is fast Arduino library for HD44780 LCD display and its clones. Operates in
 The 99.9% of all PCF8574 I²C backpacks from eBay connected like this:
 
 PCF8574 ports.......LCD pins
-- P0................4/RS
+- P0....................4/RS
 - P1................5/RW
 - P2................6/En
 - P3................16/BACKLIGHT LED-, turn-on level HIGH/POSITIVE
