@@ -1,4 +1,4 @@
-[![license-badge][]][license] ![version] ![stars][stargazers]
+[![license-badge][]][license] ![version] [![stars][]][stargazers]
 
 # LiquidCrystal_I2C
 
