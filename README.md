@@ -1,4 +1,4 @@
-[![license-badge][]][license] ![version] ![stars]
+[![license-badge][]][license] ![version] ![stars][stargazers]
 
 # LiquidCrystal_I2C
 
@@ -48,3 +48,4 @@ Supports:
 [license-badge]: https://img.shields.io/aur/license/yaourt.svg
 [version]:       https://img.shields.io/badge/Version-1.2.4-green.svg
 [stars]:         https://img.shields.io/github/stars/enjoyneering/LiquidCrystal_I2C.svg
+[stargazers]:    https://github.com/enjoyneering/LiquidCrystal_I2C/stargazers
