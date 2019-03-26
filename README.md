@@ -1,4 +1,4 @@
-[![license-badge][]][license] ![version] [![stars][]][stargazers] [![GitHub issues][]][issues]
+[![license-badge][]][license] ![version] [![stars][]][stargazers] [![hit-count][]][count] [![github-issues][]][issues]
 
 # LiquidCrystal_I2C
 
@@ -49,5 +49,7 @@ Supports:
 [version]:       https://img.shields.io/badge/Version-1.2.4-green.svg
 [stars]:         https://img.shields.io/github/stars/enjoyneering/LiquidCrystal_I2C.svg
 [stargazers]:    https://github.com/enjoyneering/LiquidCrystal_I2C/stargazers
-[GitHub issues]: https://img.shields.io/github/issues/enjoyneering/LiquidCrystal_I2C.svg
+[hit-count]:     http://hits.dwyl.io/enjoyneering/LiquidCrystal_I2C/badges.svg
+[count]:         http://hits.dwyl.io/enjoyneering/LiquidCrystal_I2C/badges
+[github-issues]: https://img.shields.io/github/issues/enjoyneering/LiquidCrystal_I2C.svg
 [issues]:        https://github.com/enjoyneering/LiquidCrystal_I2C/issues/
