@@ -1,4 +1,4 @@
-[![license-badge][]][license] ![version] [![stars][]][stargazers]
+[![license-badge][]][license] ![version] [![stars][]][stargazers] [![GitHub issues][]][issues]
 
 # LiquidCrystal_I2C
 
@@ -44,8 +44,10 @@ Supports:
 - Arduino ESP32
 - Arduino STM32
 
+[license-badge]: https://img.shields.io/badge/License-GPLv3-blue.svg
 [license]:       https://choosealicense.com/licenses/gpl-3.0/
-[license-badge]: https://img.shields.io/aur/license/yaourt.svg
 [version]:       https://img.shields.io/badge/Version-1.2.4-green.svg
 [stars]:         https://img.shields.io/github/stars/enjoyneering/LiquidCrystal_I2C.svg
 [stargazers]:    https://github.com/enjoyneering/LiquidCrystal_I2C/stargazers
+[GitHub issues]: https://img.shields.io/github/issues/enjoyneering/LiquidCrystal_I2C.svg
+[issues]:        https://github.com/enjoyneering/LiquidCrystal_I2C/issues/
