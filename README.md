@@ -19,8 +19,9 @@ PCF8574 ports.......LCD pins
 - P7.......................14/DB7
 
 The initialization string:
+```C++
 - LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
-
+```
 But what if your I²C backpack is different? The LCD pin 4/RS connected to PCF8574 port P6 & LCD pin 13/DB6 connected to PCF8574 port P0.
 
 PCF8574 ports.......LCD pins
@@ -34,8 +35,9 @@ PCF8574 ports.......LCD pins
 - P7.......................14/DB7
 
 The initialization string:
+```C++
 - LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 13, 5, 6, 16, 11, 12, 4, 14, POSITIVE);
-
+```
 
 Supports:
 
