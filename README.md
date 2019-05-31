@@ -2,9 +2,7 @@
 
 # LiquidCrystal_I2C
 
-This is fast Arduino library for HD44780 LCD display and its clones (S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780, WH160xB, AIP31066, GDM200xD). Operates in 4-bit mode via I²C bus with 8-bit I/O expander PCF8574/PCF8574A.
-
-This is fast Arduino library for HD44780 LCD display and its clones. Operates in 4-bit mode via I²C bus with 8-bit I/O expander PCF8574/PCF8574A.
+This is a fast Arduino library for LCD HD44780 and its clones (S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780, WH160xB, AIP31066, GDM200xD) It works in 4-bit mode via I²C bus with 8-bit PCF8574/PCF8574A I/O expander.
 
 The 99.9% of all PCF8574 I²C backpacks from eBay connected like this:
 
