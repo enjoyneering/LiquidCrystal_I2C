@@ -218,6 +218,9 @@ class LiquidCrystal_I2C : public Print
    uint8_t _lcd_colums;
    uint8_t _lcd_rows;
    uint8_t _backlightValue;
+#if defined(ESP32)
+   uint8_t ledChannel;
+#endif // defined(ESP32)
    uint8_t _LCD_TO_PCF8574[8];
    bool    _PCF8574_initialisation;
 
@@ -232,6 +235,10 @@ class LiquidCrystal_I2C : public Print
           uint8_t readPCF8574(void);
           bool    readBusyFlag(void);
           uint8_t getCursorPosition(void);
+	  
+#if defined(ESP32)
+	  void setLedChannel(uint8_t channel);
+#endif // defined(ESP32)
 };
 
 #endif
