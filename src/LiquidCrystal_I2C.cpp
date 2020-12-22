@@ -944,9 +944,17 @@ void LiquidCrystal_I2C::displayOn(void)
 /**************************************************************************/
 void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity)
 {
-  pinMode(pin, OUTPUT);
-
   if (polarity == NEGATIVE) value = 255 - value;
+#if defined(ESP32)
+  ledcAttachPin(pin, ledChannel);
+
+  // Change to 8-bit mode
+  ledcSetup(ledChannel, 5000, 8); // 5000Hz, 8-bits
+	
+  ledcWrite(ledChannel, value);
+#else
+  pinMode(pin, OUTPUT);	
 
   analogWrite(pin, value);
+#endif
 }
