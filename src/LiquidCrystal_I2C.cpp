@@ -950,3 +950,21 @@ void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, backlightPolar
 
   analogWrite(pin, value);
 }
+
+	
+#if defined(ESP32)
+/**************************************************************************/
+/*
+    setLedChannel()
+
+    NOTE:
+    - this function is only defined when compiled for the ESP32
+    - use this function to select the ledc channel that this library should use.
+      the default is channel 14.
+*/
+/**************************************************************************/
+void LiquidCrystal_I2C::setLedChannel(uint8_t channel)
+{
+  ledChannel = channel;
+}	
+#endif // defined(ESP32)
