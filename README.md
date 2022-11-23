@@ -19,7 +19,7 @@ The 99.9% of all PCF8574 I²C backpacks available on the market are connected li
 
 The initialization string:
 ```C++
-//                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7
+//                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7  turn-on level
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 ```
 But what if your I²C backpack is different? For example, LCD pin **4/RS** is connected to PCF8574's **P6** port, and LCD's pin **13/DB6** is connected to PCF8574's **P0** port:
@@ -37,7 +37,7 @@ But what if your I²C backpack is different? For example, LCD pin **4/RS** is co
 
 The initialization line in this case will be:
 ```C++
-//                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7
+//                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7  turn-on level
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 13, 5, 6, 16, 11, 12, 4, 14, POSITIVE);
 ```
 
