@@ -142,7 +142,7 @@ bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSiz
 
   Wire.setClock(speed);                                    //experimental! AVR I2C bus speed 31kHz..400kHz, default 100000Hz
 
-  #if !defined (__AVR_ATtiny85__)
+  #if !defined (__AVR_ATtiny85__)                          //for backwards compatibility with ATtiny Core
   Wire.setWireTimeout(stretch, false);                     //experimental! default 25000usec, true=Wire hardware will be automatically reset to default on timeout
   #endif
 
