@@ -127,7 +127,7 @@
 
 /* LCD misc */
 #define LCD_HOME_CLEAR_DELAY     2      //duration of home & clear commands, in milliseconds
-#define LCD_COMMAND_DELAY        43     //duration of command, in microseconds
+#define LCD_COMMAND_DELAY        43     //duration of command, HD44780 & clones delay varies 37usec..43usec
 #define LCD_CMD_LENGTH_8BIT      8      //8-bit command length
 #define LCD_CMD_LENGTH_4BIT      4      //4-bit command length
 #define LCD_COLUMNS_SIZE         16     //default number of columns
@@ -139,8 +139,8 @@
 /* PCF8574 misc controls */
 #define LCD_BACKLIGHT_ON         0x01
 #define LCD_BACKLIGHT_OFF        0x00
-#define PCF8574_ALL_LOW          0x00   //sets PCF8574 pins to RS=0,RW=0,E=0,DB7=0,DB6=0,DB5=0,DB4=0,BCK_LED=0
-#define PCF8574_DATA_HIGH        0x3E   //sets PCF8574 pins to RS=0,RW=0,E=1,DB7=1,DB6=1,DB5=1,DB4=1,BCK_LED=0
+#define PCF8574_PORTS_LOW        0x00   //sets PCF8574 pins to RS=0,RW=0,E=0,DB7=0,DB6=0,DB5=0,DB4=0,BCK_LED=0
+#define PCF8574_LCD_DATA_HIGH    0x3E   //sets PCF8574 pins to RS=0,RW=0,E=1,DB7=1,DB6=1,DB5=1,DB4=1,BCK_LED=0
 
 
 typedef enum : uint8_t
@@ -236,9 +236,9 @@ class LiquidCrystal_I2C : public Print
    void displayOff();
    void displayOn();
   #if defined (ESP32)
-   void setBrightness(uint8_t pin, uint8_t value, uint8_t channel, backlightPolarity polarity);
+   void setBrightness(uint8_t pin, uint8_t value, uint8_t channel);
   #else
-   void setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity);
+   void setBrightness(uint8_t pin, uint8_t value);
   #endif
 	 
   private:
@@ -255,7 +255,7 @@ class LiquidCrystal_I2C : public Print
    bool    _pcf8574PortsMaping;
 
          void    _initialization();
-         void    _send(uint8_t mode, uint8_t value, uint8_t length);
+         void    _send(uint8_t mode, uint8_t value, uint8_t cmdLength);
   inline uint8_t _portMapping(uint8_t value);
          void    _writePCF8574(uint8_t value);
          uint8_t _readPCF8574();
