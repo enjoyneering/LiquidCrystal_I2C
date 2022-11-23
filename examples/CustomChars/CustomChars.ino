@@ -1,37 +1,46 @@
 /***************************************************************************************************/
 /*
-  This is an Arduino sketch for LiquidCrystal_I2C library.
+   This is an Arduino sketch for LiquidCrystal_I2C library
 
-  This chip uses I2C bus to communicate, specials pins are required to interface
-  Board:                                    SDA                    SCL                    Level
-  Uno, Mini, Pro, ATmega168, ATmega328..... A4                     A5                     5v
-  Mega2560................................. 20                     21                     5v
-  Due, SAM3X8E............................. 20                     21                     3.3v
-  Leonardo, Micro, ATmega32U4.............. 2                      3                      5v
-  Digistump, Trinket, ATtiny85............. 0/physical pin no.5    2/physical pin no.7    5v
-  Blue Pill, STM32F103xxxx boards.......... PB7                    PB6                    3.3v/5v
-  ESP8266 ESP-01........................... GPIO0/D5               GPIO2/D3               3.3v/5v
-  NodeMCU 1.0, WeMos D1 Mini............... GPIO4/D2               GPIO5/D1               3.3v/5v
-  ESP32.................................... GPIO21/D21             GPIO22/D22             3.3v
+   This device uses I2C bus to communicate, specials pins are required to interface
+   Board                                     SDA              SCL              Level
+   Uno, Mini, Pro, ATmega168, ATmega328..... A4               A5               5v
+   Mega2560................................. 20               21               5v
+   Due, SAM3X8E............................. 20               21               3.3v
+   Leonardo, Micro, ATmega32U4.............. 2                3                5v
+   Digistump, Trinket, Gemma, ATtiny85...... PB0/D0           PB2/D2           3.3v/5v
+   Blue Pill*, STM32F103xxxx boards*........ PB9/PB7          PB8/PB6          3.3v/5v
+   ESP8266 ESP-01**......................... GPIO0            GPIO2            3.3v/5v
+   NodeMCU 1.0**, WeMos D1 Mini**........... GPIO4/D2         GPIO5/D1         3.3v/5v
+   ESP32***................................. GPIO21/D21       GPIO22/D22       3.3v
+                                             GPIO16/D16       GPIO17/D17       3.3v
+                                            *hardware I2C Wire mapped to Wire1 in stm32duino
+                                             see https://github.com/stm32duino/wiki/wiki/API#I2C
+                                           **most boards has 10K..12K pullup-up resistor
+                                             on GPIO0/D3, GPIO2/D4/LED & pullup-down on
+                                             GPIO15/D8 for flash & boot
+                                          ***hardware I2C Wire mapped to TwoWire(0) aka GPIO21/GPIO22 in Arduino ESP32
 
-  Frameworks & Libraries:
-  ATtiny Core           - https://github.com/SpenceKonde/ATTinyCore
-  ESP32 Core            - https://github.com/espressif/arduino-esp32
-  ESP8266 Core          - https://github.com/esp8266/Arduino
-  ESP8266 I2C lib fixed - https://github.com/enjoyneering/ESP8266-I2C-Driver
-  STM32 Core            - https://github.com/rogerclarkmelbourne/Arduino_STM32
 
-  GNU GPL license, all text above must be included in any redistribution, see link below for details:
-  - https://www.gnu.org/licenses/licenses.html
+   Supported frameworks:
+   Arduino Core - https://github.com/arduino/Arduino/tree/master/hardware
+   ATtiny  Core - https://github.com/SpenceKonde/ATTinyCore
+   ESP8266 Core - https://github.com/esp8266/Arduino
+   ESP32   Core - https://github.com/espressif/arduino-esp32
+   STM32   Core - https://github.com/stm32duino/Arduino_Core_STM32
+
+
+   GNU GPL license, all text above must be included in any redistribution,
+   see link for details - https://www.gnu.org/licenses/licenses.html
 */
 /***************************************************************************************************/
-#pragma GCC optimize ("O2")    //code optimisation controls - "O2" & "O3" code performance, "Os" code size
+#pragma GCC optimize ("O3") //code optimisation controls - "O2" & "O3" code performance, "Os" code size
 
-#include <Wire.h>              //for ESP8266 use bug free i2c driver https://github.com/enjoyneering/ESP8266-I2C-Driver
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
 /* 
-   Some usefull icons located in the LCD ROM, see p.9 of GDM2004D datasheet for details
+   Some usefull icons located in LCD ROM, see p.9 of GDM2004D datasheet for details
    NOTE: your LCD could be different, use "romPattern.ino" example to find out what is in your ROM
 */
 #define ARROW_LEFT  0x7E
@@ -46,8 +55,8 @@
 #define SQ_ROOT     0xE8
 #define SPACE       0x20
 
-#define COLUMS      20
-#define ROWS        4
+#define COLUMS      20   //LCD columns
+#define ROWS        4    //LCD rows
 
 const uint8_t bell[8]    PROGMEM = {0x04, 0x0E, 0x0E, 0x0E, 0x1F, 0x00, 0x04, 0x00}; //PROGMEM saves variable to flash & keeps dynamic memory free
 const uint8_t note[8]    PROGMEM = {0x01, 0x03, 0x05, 0x09, 0x0B, 0x1B, 0x18, 0x00};
@@ -67,7 +76,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  while (lcd.begin(COLUMS, ROWS) != 1) //colums - 20, rows - 4
+  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) //colums, rows, characters size
   {
     Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal."));
     delay(5000);   
@@ -78,14 +87,14 @@ void setup()
 
   lcd.clear();
   
-  lcd.createChar(0, bell);    //variable stored in flash
-  lcd.createChar(1, note);    //variable stored in flash
-  lcd.createChar(2, watch);   //variable stored in flash
-  lcd.createChar(3, heart);   //variable stored in flash
-  lcd.createChar(4, duck);    //variable stored in flash
-  lcd.createChar(5, check);   //variable stored in flash
-  lcd.createChar(6, lock);    //variable stored in flash
-  lcd.createChar(7, battery); //variable stored in dynamic memory
+  lcd.createChar(0, bell);                                          //variable stored in flash, acceptable - there is no array boundary check, array size must be array[8] or system will crash
+  lcd.createChar(1, note,    sizeof(note) / sizeof(note[0]));       //variable stored in flash, excellent - array boundary check
+  lcd.createChar(2, watch,   sizeof(watch) / sizeof(watch[0]));     //variable stored in flash
+  lcd.createChar(3, heart,   sizeof(heart) / sizeof(heart[0]));     //variable stored in flash
+  lcd.createChar(4, duck,    sizeof(duck) / sizeof(duck[0]));       //variable stored in flash
+  lcd.createChar(5, check,   sizeof(check) / sizeof(check[0]));     //variable stored in flash
+  lcd.createChar(6, lock,    sizeof(lock) / sizeof(lock[0]));       //variable stored in flash
+  lcd.createChar(7, battery, sizeof(battery) / sizeof(battery[0])); //variable stored in RAM
 }
 
 void loop()
