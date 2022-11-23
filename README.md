@@ -4,7 +4,7 @@
 
 This is small and fast Arduino library for LCD HD44780 and its clones (S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780, WH160xB, AIP31066, GDM200xD). The display operates in 4-bit mode over I²C bus with 8-bit I/O expander PCF8574/PCF8574A.
 
-The 99.9% of all PCF8574 I²C backpacks from eBay connected like this:
+The 99.9% of all PCF8574 I²C backpacks available on the market are connected like this:
 
 | PCF8574 ports | LCD pins |
 | ---- | ------- |
@@ -19,25 +19,25 @@ The 99.9% of all PCF8574 I²C backpacks from eBay connected like this:
 
 The initialization string:
 ```C++
-//                    A1=HIGH, A2=HIGH, A3=HIGH P0 P1 P2 P3  P4  P5  P6  P7
+//                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 ```
-But what if your I²C backpack is different? For example, LCD pin **4/RS** is connected to PCF8574's **P6** port, and LCD's pin **13/DB6** is connected to PCF8574's **P0** port.
+But what if your I²C backpack is different? For example, LCD pin **4/RS** is connected to PCF8574's **P6** port, and LCD's pin **13/DB6** is connected to PCF8574's **P0** port:
 
 | PCF8574 ports | LCD pins |
 | ---- | ------- |
 | P0 | 13/DB6 |
 | P1 | 5/RW |
 | P2 | 6/En |
-| P3 | 16/BACKLIGHT LED- (with turn-on level HIGH/POSITIVE) |
+| P3 | 16/BACKLIGHT LED- (turn-on level HIGH/POSITIVE) |
 | P4 | 11/DB4 |
 | P5 | 12/DB5 |
 | P6 | 4/RS |
 | P7 | 14/DB7 |
 
-The initialization string:
+The initialization line in this case will be:
 ```C++
-//                    A1=HIGH, A2=HIGH, A3=HIGH P0 P1 P2 P3  P4  P5  P6  P7
+//                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 13, 5, 6, 16, 11, 12, 4, 14, POSITIVE);
 ```
 
