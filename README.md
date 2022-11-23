@@ -11,7 +11,7 @@ The 99.9% of all PCF8574 I²C backpacks from eBay connected like this:
 | P0 | 4/RS |
 | P1 | 5/RW |
 | P2 | 6/En |
-| P3 | 16/BACKLIGHT LED-, with turn-on level HIGH/POSITIVE |
+| P3 | 16/BACKLIGHT LED- (turn-on level HIGH/POSITIVE) |
 | P4 | 11/DB4 |
 | P5 | 12/DB5 |
 | P6 | 13/DB6 |
@@ -28,7 +28,7 @@ But what if your I²C backpack is different? The LCD pin **4/RS** connected to P
 | P0 | 13/DB6 |
 | P1 | 5/RW |
 | P2 | 6/En |
-| P3 | 16/BACKLIGHT LED-, with turn-on level HIGH/POSITIVE |
+| P3 | 16/BACKLIGHT LED- (with turn-on level HIGH/POSITIVE) |
 | P4 | 11/DB4 |
 | P5 | 12/DB5 |
 | P6 | 4/RS |
