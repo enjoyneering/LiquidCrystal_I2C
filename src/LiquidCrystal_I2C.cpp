@@ -181,7 +181,7 @@ bool LiquidCrystal_I2C::begin()
 
   if (Wire.endTransmission() != 0) {return false;}         //safety check, make sure the PCF8574 is connected
 
-  _writePCF8574(PCF8574_ALL_LOW);                          //safety check, set all PCF8574 pins low
+  _writePCF8574(PCF8574_PORTS_LOW);                        //safety, set all PCF8574 pins low
 
   _lcdColumns  = columns;
   _lcdRows     = rows;
@@ -568,7 +568,7 @@ void LiquidCrystal_I2C::noBacklight()
 
   _backlightValue <<= _lcdToPCF8574[0];
 
-  _writePCF8574(PCF8574_ALL_LOW);
+  _writePCF8574(PCF8574_PORTS_LOW);
 }
 
 
@@ -597,7 +597,7 @@ void LiquidCrystal_I2C::backlight()
 
   _backlightValue <<= _lcdToPCF8574[0];
 
-  _writePCF8574(PCF8574_ALL_LOW);
+  _writePCF8574(PCF8574_PORTS_LOW);
 }
 
 
@@ -786,9 +786,9 @@ void LiquidCrystal_I2C::displayOn()
 */
 /**************************************************************************/
 #if defined (ESP32)
-void setBrightness(uint8_t pin, uint8_t value, uint8_t channel, backlightPolarity polarity)
+void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, uint8_t channel)
 #else
-void setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity)
+void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value)
 #endif
 {
   #if !defined(ESP32)
@@ -796,22 +796,22 @@ void setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity)
   #endif
 
   #if defined(ESP8266)
-//analogWriteResolution(8);                        //set PWM resolution 4-bit(15)..16-bit(65535), default 8-bit(256)
-//analogWriteFreq(1000);                           //set ESP8266 PWM frequecy 100Hz..40KHz, default 1000Hz
+//analogWriteResolution(8);                                  //set PWM resolution 4-bit(15)..16-bit(65535), default 8-bit(256)
+//analogWriteFreq(1000);                                     //set ESP8266 PWM frequecy 100Hz..40KHz, default 1000Hz
   #elif defined(ESP32)
-  ledcAttachPin(pin, channel);                     //assign pin to PWM channel xx
-  ledcSetup(channel, 1000, 8);                     //set PWM channel xx to 1KHz period, 8-bit(256) resolution
+  ledcAttachPin(pin, channel);                               //assign pin to PWM channel xx
+  ledcSetup(channel, 1000, 8);                               //set PWM channel xx to 1KHz period, 8-bit(256) resolution
   #elif defined(_VARIANT_ARDUINO_STM32_)
-//analogWriteResolution(8);                        //set PWM resolution 8-bit(256)..16-bit(65535), default 8-bit(256)
-//analogWriteFrequency(1000);                      //set PWM frequecy, default 1000Hz
+//analogWriteResolution(8);                                  //set PWM resolution 8-bit(256)..16-bit(65535), default 8-bit(256)
+//analogWriteFrequency(1000);                                //set PWM frequecy, default 1000Hz
   #endif
 
-  if (polarity == NEGATIVE) {value = 255 - value;} //256=8-bit PWM
+  if (_backlightPolarity == NEGATIVE) {value = 255 - value;} //256=8-bit PWM
 
   #if defined(ESP32)
-  ledcWrite(channel, value);                       //set duty cycle for PWM channel xx
+  ledcWrite(channel, value);                                 //set duty cycle for PWM channel xx
   #else
-  analogWrite(pin, value);
+  analogWrite(pin, value);                                   //set duty cycle for pin
   #endif
 }
 
@@ -827,11 +827,11 @@ void setBrightness(uint8_t pin, uint8_t value, backlightPolarity polarity)
       - mode : RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
       - value: DB7,DB6,DB5,DB4,DB3,DB2,DB1,DB0
 
-    - duration of command > 43usec for GDM2004D
-    - duration of the En pulse > 450nsec
+    - command duration for HD44780 & clones varies 37usec..43usec
+    - En pulse duration > 450nsec
 */
 /**************************************************************************/
-void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t length)
+void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t cmdLength)
 {
   uint8_t halfByte; //lsb or msb
   uint8_t data;
@@ -845,10 +845,9 @@ void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t length)
                                                //En pulse duration > 450nsec
   bitClear(data, _lcdToPCF8574[5]);            //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
   _writePCF8574(data);                         //execute command
-  delayMicroseconds(LCD_COMMAND_DELAY);        //command duration
 
-  /* second part of 8-bit command */
-  if (length == LCD_CMD_LENGTH_8BIT)
+  /* 2-nd part of 8-bit command */
+  if (cmdLength == LCD_CMD_LENGTH_8BIT)
   {
     halfByte  = value << 1;                    //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
     halfByte &= 0x1E;                          //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0
@@ -858,8 +857,9 @@ void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t length)
                                                //En pulse duration > 450nsec
     bitClear(data, _lcdToPCF8574[5]);          //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
     _writePCF8574(data);                       //execute command
-    delayMicroseconds(LCD_COMMAND_DELAY);      //command duration
   }
+
+  delayMicroseconds(LCD_COMMAND_DELAY);        //command duration, see NOTE
 }
 
 
@@ -889,7 +889,7 @@ void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t length)
 /**************************************************************************/
 uint8_t LiquidCrystal_I2C::_portMapping(uint8_t value)
 {
-  uint8_t data;
+  uint8_t data = 0;
 
   /* mapping value = RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED */
   for (int8_t i = 7; i >= 0; i--)
@@ -977,7 +977,7 @@ uint8_t LiquidCrystal_I2C::_readPCF8574()
 /**************************************************************************/
 bool LiquidCrystal_I2C::_readBusyFlag()
 {
-  _send(LCD_BUSY_FLAG_READ, PCF8574_DATA_HIGH, LCD_CMD_LENGTH_4BIT); //set RS=0, RW=1 & input pins to HIGH, see NOTE
+  _send(LCD_BUSY_FLAG_READ, PCF8574_LCD_DATA_HIGH, LCD_CMD_LENGTH_4BIT); //set RS=0, RW=1 & input pins to HIGH, see NOTE
 
   return bitRead(_readPCF8574(), _lcdToPCF8574[4]);
 }
