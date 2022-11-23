@@ -8,7 +8,7 @@
    Mega2560................................. 20               21               5v
    Due, SAM3X8E............................. 20               21               3.3v
    Leonardo, Micro, ATmega32U4.............. 2                3                5v
-   Digistump, Trinket, Gemma, ATtiny85...... PB0              PB2              5v
+   Digistump, Trinket, Gemma, ATtiny85...... PB0/D0           PB2/D2           3.3v/5v
    Blue Pill*, STM32F103xxxx boards*........ PB9/PB7          PB8/PB6          3.3v/5v
    ESP8266 ESP-01**......................... GPIO0            GPIO2            3.3v/5v
    NodeMCU 1.0**, WeMos D1 Mini**........... GPIO4/D2         GPIO5/D1         3.3v/5v
