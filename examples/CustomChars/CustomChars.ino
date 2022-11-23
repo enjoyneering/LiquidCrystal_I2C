@@ -21,7 +21,6 @@
                                              GPIO15/D8 for flash & boot
                                           ***hardware I2C Wire mapped to TwoWire(0) aka GPIO21/GPIO22 in Arduino ESP32
 
-
    Supported frameworks:
    Arduino Core - https://github.com/arduino/Arduino/tree/master/hardware
    ATtiny  Core - https://github.com/SpenceKonde/ATTinyCore
