@@ -3,7 +3,7 @@
    This is an Arduino sketch for LiquidCrystal_I2C library
 
    Single character printing speed test results:
-   ESP8266   at 80MHz....................... 854us*
+   ESP8266   at 80MHz....................... 1155us*
    STM32     at 72MHz....................... 902us*                    
    ATmega328 at 16MHz....................... 1088us*
                     *I2C speed 100KHz, stretch 1000usec
@@ -49,12 +49,11 @@
 #define COLUMS        20       //LCD columns
 #define ROWS          4        //LCD rows
 #define I2C_BUS_SPEED 400000   //I2C bus speed 400000Hz
+#define ALPHABET_SIZE 26
 
-/* PROGMEM saves variable to flash & keeps dynamic memory free */
-const char alphabet[26] PROGMEM = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-
-char     letter;
 uint32_t startTimer;
+char     letter;
+char     alphabet[ALPHABET_SIZE] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
   
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
@@ -85,7 +84,7 @@ void loop()
 {
   lcd.setCursor(random(0, COLUMS), random(0, ROWS));
 
-  letter = alphabet[random(0, 26)];                 //copy symbol from flash to dynamic memory
+  letter = alphabet[random(0, ALPHABET_SIZE)];
 
   startTimer = micros();
 
