@@ -162,7 +162,7 @@ bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSiz
 
   Wire.setTimeout(stretch / 1000);                         //experimental! default 50msec
 
-#elif defined (_VARIANT_ARDUINO_STM32_)
+#elif defined (ARDUINO_ARCH_STM32)
 bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize, uint8_t sda, uint8_t scl, uint32_t speed)
 {
   Wire.begin(sda, scl);
@@ -801,7 +801,7 @@ void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value)
   #elif defined(ESP32)
   ledcAttachPin(pin, channel);                               //assign pin to PWM channel xx
   ledcSetup(channel, 1000, 8);                               //set PWM channel xx to 1KHz period, 8-bit(256) resolution
-  #elif defined(_VARIANT_ARDUINO_STM32_)
+  #elif defined(ARDUINO_ARCH_STM32)
 //analogWriteResolution(8);                                  //set PWM resolution 8-bit(256)..16-bit(65535), default 8-bit(256)
 //analogWriteFrequency(1000);                                //set PWM frequecy, default 1000Hz
   #endif
@@ -889,7 +889,7 @@ void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t cmdLength)
 /**************************************************************************/
 uint8_t LiquidCrystal_I2C::_portMapping(uint8_t value)
 {
-  uint8_t data = 0;
+  uint8_t data = 0x00;
 
   /* mapping value = RS,RW,E,DB7,DB6,DB5,DB4,BCK_LED */
   for (int8_t i = 7; i >= 0; i--)
