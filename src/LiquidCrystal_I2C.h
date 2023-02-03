@@ -197,7 +197,7 @@ class LiquidCrystal_I2C : public Print
   #elif defined (ESP32)
    bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, int32_t sda = SDA, int32_t scl = SCL, uint32_t speed = LCD_I2C_SPEED, uint32_t stretch = LCD_I2C_ACK_STRETCH);
   #elif defined (ARDUINO_ARCH_STM32)
-   bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, uint8_t sda = SDA, uint8_t scl = SCL, uint32_t speed = LCD_I2C_SPEED);
+   bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, uint32_t sda = SDA, uint32_t scl = SCL, uint32_t speed = LCD_I2C_SPEED);
   #else
    bool begin();
   #endif
