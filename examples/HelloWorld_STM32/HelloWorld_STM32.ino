@@ -9,7 +9,7 @@
    Due, SAM3X8E............................. 20               21               3.3v
    Leonardo, Micro, ATmega32U4.............. 2                3                5v
    Digistump, Trinket, Gemma, ATtiny85...... PB0/D0           PB2/D2           3.3v/5v
-   Blue Pill*, STM32F103xxxx boards*........ PB9/PB7          PB8/PB6          3.3v/5v
+   Blue Pill*, STM32F103xxxx boards*........ PB7/PB9          PB6/PB8          3.3v/5v
    ESP8266 ESP-01**......................... GPIO0            GPIO2            3.3v/5v
    NodeMCU 1.0**, WeMos D1 Mini**........... GPIO4/D2         GPIO5/D1         3.3v/5v
    ESP32***................................. GPIO21/D21       GPIO22/D22       3.3v
@@ -39,16 +39,16 @@
 
 #define COLUMS           20   //LCD columns
 #define ROWS             4    //LCD rows
-#define LCD_SPACE_SYMBOL 0x20 //space symbol from LCD ROM, see p.9 of GDM2004D datasheet
+#define LCD_SPACE_SYMBOL 0x20 //space symbol from LCD ROM, see p.9 of GDM2004D datasheet or english ASCII printable characters
 
 
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(115200);             //TX=PA9, RX=PA10
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS, PB9, PB8, 400000) != 1) //colums, rows, characters size, SDA, SCL, I2C speed in Hz
+  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS, PB7, PB6, 400000) != 1) //colums, rows, characters size, SDA, SCL, I2C speed in Hz
   {
     Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal."));
     delay(5000);
@@ -61,16 +61,16 @@ void setup()
 
   /* prints static text */
   lcd.print(F("Hello world!"));
-  lcd.setCursor(0, 1);              //set 1-st colum & 2-nd row, 1-st colum & row started at zero
+  lcd.setCursor(0, 1);              //set 1-st colum & 2-nd row
   lcd.print(F("Random number:"));
 }
 
 void loop()
 {
   /* prints dynamic text */
-  lcd.setCursor(14, 1);             //set 15-th colum & 2-nd row, 1-st colum & row started at zero
+  lcd.setCursor(14, 1);             //set 15-th colum & 2-nd row
   lcd.print(random(10, 1000));
-  lcd.write(LCD_SPACE_SYMBOL);
+  lcd.write(LCD_SPACE_SYMBOL);      //"write(0x20)" faster than "print(" ")"
 
   delay(1000);
 }
