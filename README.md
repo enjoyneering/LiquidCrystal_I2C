@@ -17,7 +17,7 @@ The 99.9% of all PCF8574 I²C backpacks available on the market are connected li
 | P6 | 13/DB6 |
 | P7 | 14/DB7 |
 
-The initialization string:
+Initialization string for this connection:
 ```C++
 //                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7  backlight turn-on level
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
