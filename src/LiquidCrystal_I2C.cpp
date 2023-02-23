@@ -162,13 +162,12 @@ bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSiz
 
   Wire.setTimeout(stretch / 1000);                         //experimental! default 50msec
 
-#elif defined (ARDUINO_ARCH_STM32)
+#elif defined (ARDUINO_ARCH_STM32) or defined (ARDUINO_ARCH_SAMD)
 bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize, uint32_t sda, uint32_t scl, uint32_t speed) //"uint32_t" for pins only, "uint8_t" calls wrong "setSCL(PinName scl)"
 {
   Wire.begin(sda, scl);
 
   Wire.setClock(speed);                                    //experimental! STM32 I2C bus speed ???kHz..400kHz, default 100000Hz
-
 #else
 bool LiquidCrystal_I2C::begin()
 {
