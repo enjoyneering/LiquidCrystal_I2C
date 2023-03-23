@@ -16,6 +16,7 @@
    Uno, Mini, Pro, ATmega168, ATmega328..... A4               A5               5v
    Mega2560................................. 20               21               5v
    Due, SAM3X8E............................. 20               21               3.3v
+   MKR Zero, XIAO SAMD21, SAMD21xx.......... PA08             PA09             3.3v
    Leonardo, Micro, ATmega32U4.............. 2                3                5v
    Digistump, Trinket, Gemma, ATtiny85...... PB0/D0           PB2/D2           3.3v/5v
    Blue Pill*, STM32F103xxxx boards*........ PB7/PB9          PB6/PB8          3.3v/5v
@@ -36,6 +37,7 @@
    ESP8266 Core - https://github.com/esp8266/Arduino
    ESP32   Core - https://github.com/espressif/arduino-esp32
    STM32   Core - https://github.com/stm32duino/Arduino_Core_STM32
+   SAMD    Core - https://github.com/arduino/ArduinoCore-samd
 
 
    GNU GPL license, all text above must be included in any redistribution,
@@ -135,7 +137,7 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(pcf8574Address addr, uint8_t P0, uint8_t P1
       - 4, other error
 */
 /**************************************************************************/
-#if defined (__AVR__)
+#if defined (ARDUINO_ARCH_AVR)
 bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize, uint32_t speed, uint32_t stretch)
 {
   Wire.begin();
@@ -146,7 +148,7 @@ bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSiz
   Wire.setWireTimeout(stretch, false);                     //experimental! default 25000usec, true=Wire hardware will be automatically reset to default on timeout
   #endif
 
-#elif defined (ESP8266)
+#elif defined (ARDUINO_ARCH_ESP8266)
 bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize, uint8_t sda, uint8_t scl, uint32_t speed, uint32_t stretch)
 {
   Wire.begin(sda, scl);
@@ -155,7 +157,7 @@ bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSiz
 
   Wire.setClockStretchLimit(stretch);                      //experimental! default 150000usec
 
-#elif defined (ESP32)
+#elif defined (ARDUINO_ARCH_ESP32)
 bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize, int32_t sda, int32_t scl, uint32_t speed, uint32_t stretch) //"int32_t" for Master SDA & SCL, "uint8_t" for Slave SDA & SCL
 {
   if (Wire.begin(sda, scl, speed) != true) {return false;} //experimental! ESP32 I2C bus speed ???kHz..400kHz, default 100000Hz
@@ -169,8 +171,15 @@ bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSiz
 
   Wire.setClock(speed);                                    //experimental! STM32 I2C bus speed ???kHz..400kHz, default 100000Hz
 
+#elif defined (ARDUINO_ARCH_SAMD)
+bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize, uint32_t speed)
+{
+  Wire.begin();
+
+  Wire.setClock(speed);                                    //experimental! SAMD21 I2C bus speed ???kHz..400kHz, default 100000Hz
+
 #else
-bool LiquidCrystal_I2C::begin()
+bool LiquidCrystal_I2C::begin(uint8_t columns, uint8_t rows, lcdFontSize fontSize)
 {
   Wire.begin();
 #endif
@@ -785,30 +794,32 @@ void LiquidCrystal_I2C::displayOn()
     - recomended voltage on "LED" top pin 0.50v..4.5v 
 */
 /**************************************************************************/
-#if defined (ESP32)
+#if defined (ARDUINO_ARCH_ESP32)
 void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value, uint8_t channel)
 #else
 void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value)
 #endif
 {
-  #if !defined(ESP32)
+  #if !defined (ARDUINO_ARCH_ESP32)
   pinMode(pin, OUTPUT);
   #endif
 
-  #if defined(ESP8266)
+  #if defined (ARDUINO_ARCH_ESP8266)
 //analogWriteResolution(8);                                  //set PWM resolution 4-bit(15)..16-bit(65535), default 8-bit(256)
 //analogWriteFreq(1000);                                     //set ESP8266 PWM frequecy 100Hz..40KHz, default 1000Hz
-  #elif defined(ESP32)
+  #elif defined (ARDUINO_ARCH_ESP32)
   ledcAttachPin(pin, channel);                               //assign pin to PWM channel xx
   ledcSetup(channel, 1000, 8);                               //set PWM channel xx to 1KHz period, 8-bit(256) resolution
-  #elif defined(ARDUINO_ARCH_STM32)
+  #elif defined (ARDUINO_ARCH_STM32)
 //analogWriteResolution(8);                                  //set PWM resolution 8-bit(256)..16-bit(65535), default 8-bit(256)
 //analogWriteFrequency(1000);                                //set PWM frequecy, default 1000Hz
+  #elif defined (ARDUINO_ARCH_SAMD)
+//analogWriteResolution(8);                                  //set PWM resolution 8-bit(256)..16-bit(65535), default 8-bit(256)
   #endif
 
   if (_backlightPolarity == NEGATIVE) {value = 255 - value;} //256=8-bit PWM
 
-  #if defined(ESP32)
+  #if defined (ARDUINO_ARCH_ESP32)
   ledcWrite(channel, value);                                 //set duty cycle for PWM channel xx
   #else
   analogWrite(pin, value);                                   //set duty cycle for pin
@@ -833,30 +844,29 @@ void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value)
 /**************************************************************************/
 void LiquidCrystal_I2C::_send(uint8_t mode, uint8_t value, uint8_t cmdLength)
 {
-  uint8_t halfByte; //lsb or msb
-  uint8_t data;
+  uint8_t halfByte; //LSB or MSB part of value
 
   /* 4-bit or 1-st part of 8-bit command */
   halfByte  = value >> 3;                      //0,0,0,DB7,DB6,DB5,DB4,DB3
-  halfByte &= 0x1E;                            //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0
-  data      = _portMapping(mode | halfByte);   //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
+  halfByte &= 0x1E;                            //0,0,0,DB7,DB6,DB5,DB4,BCK_LED=0 (value LBS)
+  halfByte  = _portMapping(mode | halfByte);   //RS,RW,E=1,DB7,DB6,DB5,DB4,BCK_LED=0
 
-  _writePCF8574(data);                         //send command
+  _writePCF8574(halfByte);                     //send command
                                                //En pulse duration > 450nsec
-  bitClear(data, _lcdToPCF8574[5]);            //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
-  _writePCF8574(data);                         //execute command
+  bitClear(halfByte, _lcdToPCF8574[5]);        //RS,RW,E=0,DB7,DB6,DB5,DB4,BCK_LED=0
+  _writePCF8574(halfByte);                     //execute command
 
   /* 2-nd part of 8-bit command */
   if (cmdLength == LCD_CMD_LENGTH_8BIT)
   {
     halfByte  = value << 1;                    //DB6,DB5,DB4,DB3,DB2,DB1,DB0,0
-    halfByte &= 0x1E;                          //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0
-    data      = _portMapping(mode | halfByte); //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
+    halfByte &= 0x1E;                          //0,0,0,DB3,DB2,DB1,DB0,BCK_LED=0 (value MSB)
+    halfByte  = _portMapping(mode | halfByte); //RS,RW,E=1,DB3,DB2,DB1,DB0,BCK_LED=0
 
-    _writePCF8574(data);                       //send command
+    _writePCF8574(halfByte);                   //send command
                                                //En pulse duration > 450nsec
-    bitClear(data, _lcdToPCF8574[5]);          //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
-    _writePCF8574(data);                       //execute command
+    bitClear(halfByte, _lcdToPCF8574[5]);      //RS,RW,E=0,DB3,DB2,DB1,DB0,BCK_LED=0
+    _writePCF8574(halfByte);                   //execute command
   }
 
   delayMicroseconds(LCD_COMMAND_DELAY);        //command duration, see NOTE
