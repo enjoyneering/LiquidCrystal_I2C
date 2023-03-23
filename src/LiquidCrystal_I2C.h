@@ -16,6 +16,7 @@
    Uno, Mini, Pro, ATmega168, ATmega328..... A4               A5               5v
    Mega2560................................. 20               21               5v
    Due, SAM3X8E............................. 20               21               3.3v
+   MKR Zero, XIAO SAMD21, SAMD21xx.......... PA08             PA09             3.3v
    Leonardo, Micro, ATmega32U4.............. 2                3                5v
    Digistump, Trinket, Gemma, ATtiny85...... PB0/D0           PB2/D2           3.3v/5v
    Blue Pill*, STM32F103xxxx boards*........ PB7/PB9          PB6/PB8          3.3v/5v
@@ -36,6 +37,7 @@
    ESP8266 Core - https://github.com/esp8266/Arduino
    ESP32   Core - https://github.com/espressif/arduino-esp32
    STM32   Core - https://github.com/stm32duino/Arduino_Core_STM32
+   SAMD    Core - https://github.com/arduino/ArduinoCore-samd
 
 
    GNU GPL license, all text above must be included in any redistribution,
@@ -49,12 +51,12 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-#if defined (__AVR__)
-#include <avr/pgmspace.h>               //for Arduino AVR PROGMEM support
-#elif defined (ESP8266)
-#include <pgmspace.h>                   //for Arduino ESP8266 PROGMEM support
-#elif defined (ARDUINO_ARCH_STM32)
-#include <avr/pgmspace.h>               //for Arduino STM32 PROGMEM support
+#if defined (ARDUINO_ARCH_AVR)
+#include <avr/pgmspace.h>          //for Arduino AVR PROGMEM support
+#elif defined (ARDUINO_ARCH_ESP8266) || defined (ARDUINO_ARCH_ESP32)
+#include <pgmspace.h>              //for Arduino ESP8266 PROGMEM support
+#elif defined (ARDUINO_ARCH_STM32) || defined (ARDUINO_ARCH_SAMD)
+#include <avr/pgmspace.h>          //for Arduino STM32 & SAMD21 PROGMEM support
 #endif
 
 
@@ -190,16 +192,18 @@ class LiquidCrystal_I2C : public Print
   public:
    LiquidCrystal_I2C(pcf8574Address = PCF8574_ADDR_A21_A11_A01, uint8_t P0 = 4, uint8_t P1 = 5, uint8_t P2 = 6, uint8_t P3 = 16, uint8_t P4 = 11, uint8_t P5 = 12, uint8_t P6 = 13, uint8_t P7 = 14, backlightPolarity = POSITIVE);
  
-  #if defined (__AVR__)
+  #if defined (ARDUINO_ARCH_AVR)
    bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, uint32_t speed = LCD_I2C_SPEED, uint32_t stretch = LCD_I2C_ACK_STRETCH);
-  #elif defined (ESP8266)
+  #elif defined (ARDUINO_ARCH_ESP8266)
    bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, uint8_t sda = SDA, uint8_t scl = SCL, uint32_t speed = LCD_I2C_SPEED, uint32_t stretch = LCD_I2C_ACK_STRETCH);
-  #elif defined (ESP32)
+  #elif defined (ARDUINO_ARCH_ESP32)
    bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, int32_t sda = SDA, int32_t scl = SCL, uint32_t speed = LCD_I2C_SPEED, uint32_t stretch = LCD_I2C_ACK_STRETCH);
   #elif defined (ARDUINO_ARCH_STM32)
    bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, uint32_t sda = SDA, uint32_t scl = SCL, uint32_t speed = LCD_I2C_SPEED);
+  #elif defined (ARDUINO_ARCH_SAMD)
+   bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS, uint32_t speed = LCD_I2C_SPEED);
   #else
-   bool begin();
+   bool begin(uint8_t columns = LCD_COLUMNS_SIZE, uint8_t rows = LCD_ROWS_SIZE, lcdFontSize = LCD_5x8DOTS);
   #endif
 
    void clear();
@@ -235,7 +239,7 @@ class LiquidCrystal_I2C : public Print
    void printHorizontalGraph(char name, uint8_t row, uint16_t setValue, uint16_t maxValue);
    void displayOff();
    void displayOn();
-  #if defined (ESP32)
+  #if defined (ARDUINO_ARCH_ESP32)
    void setBrightness(uint8_t pin, uint8_t value, uint8_t channel);
   #else
    void setBrightness(uint8_t pin, uint8_t value);
