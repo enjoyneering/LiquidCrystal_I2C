@@ -47,6 +47,7 @@ Supports:
 - Arduino ESP8266
 - Arduino ESP32
 - Arduino STM32
+- Arduino SAMD21
 
 [license-badge]: https://img.shields.io/badge/License-GPLv3-blue.svg
 [license]:       https://choosealicense.com/licenses/gpl-3.0/
