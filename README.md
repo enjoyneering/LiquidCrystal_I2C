@@ -22,7 +22,7 @@ The initialization string for this connection:
 //                    A2=HIGH, A1=HIGH, A0=HIGH P0 P1 P2 P3  P4  P5  P6  P7  backlight turn-on level
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 ```
-But what if your I²C backpack is different? For example, LCD pin **4/RS** is connected to **port P6** and LCD's pin **13/DB6** is connected to **port P0**:
+But what if your I²C backpack is different? For example, LCD pin **4/RS** is connected **to port P6** and LCD's pin **13/DB6** is connected **to port P0**:
 
 | PCF8574 ports | LCD pins |
 | ---- | ------- |
