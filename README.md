@@ -26,7 +26,7 @@ But what if your I²C backpack is different? For example, LCD pin **4/RS** is co
 
 | PCF8574 ports | LCD pins |
 | ---- | ------- |
-| **P0** | **13/DB6** |
+| **P0** | **13/DB6** :warning:|
 | P1 | 5/RW |
 | P2 | 6/En |
 | P3 | 16/BACKLIGHT LED- (turn-on level HIGH/POSITIVE) |
