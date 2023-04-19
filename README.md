@@ -32,7 +32,7 @@ But what if your I²C backpack is different? For example, LCD pin **4/RS** is co
 | P3 | 16/BACKLIGHT LED- (turn-on level HIGH/POSITIVE) |
 | P4 | 11/DB4 |
 | P5 | 12/DB5 |
-| **P6** | **4/RS** |
+| **P6** | **4/RS** :warning:|
 | P7 | 14/DB7 |
 
 The initialization string in this case:
