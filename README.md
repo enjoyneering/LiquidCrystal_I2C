@@ -4,7 +4,7 @@
 
 This is small and fast Arduino library for LCD HD44780 and its clones (S6A0069, KS0066U, NT3881D, LC7985, ST7066, SPLC780, WH160xB, AIP31066, GDM200xD). The display operates in 4-bit mode over I²C bus with 8-bit I/O expander PCF8574/PCF8574A.
 
-The 99.9% of all PCF8574/PCF8574A I²C backpacks available on the market are connected like this:
+The 99.9% of all PCF8574(A) I²C backpacks available on the market are connected like this:
 
 | PCF8574 ports | LCD pins |
 | ---- | ------- |
