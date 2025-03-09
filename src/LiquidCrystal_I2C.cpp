@@ -808,8 +808,12 @@ void LiquidCrystal_I2C::setBrightness(uint8_t pin, uint8_t value)
 //analogWriteResolution(8);                                  //set PWM resolution 4-bit(15)..16-bit(65535), default 8-bit(256)
 //analogWriteFreq(1000);                                     //set ESP8266 PWM frequecy 100Hz..40KHz, default 1000Hz
   #elif defined (ARDUINO_ARCH_ESP32)
+    #if ESP_IDF_VERSION_MAJOR >= 3
+  ledcAttach(pin, 1000, channel);                            //set PWM channel xx to 1KHz period, 8-bit(256) resolution
+    #else
   ledcAttachPin(pin, channel);                               //assign pin to PWM channel xx
   ledcSetup(channel, 1000, 8);                               //set PWM channel xx to 1KHz period, 8-bit(256) resolution
+    #endif
   #elif defined (ARDUINO_ARCH_STM32)
 //analogWriteResolution(8);                                  //set PWM resolution 8-bit(256)..16-bit(65535), default 8-bit(256)
 //analogWriteFrequency(1000);                                //set PWM frequecy, default 1000Hz
